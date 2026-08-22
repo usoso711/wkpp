@@ -1,3 +1,8 @@
+/* =========================================================
+   💩＆くすり記録アプリ
+   完全版 app.js
+========================================================= */
+
 const SUPABASE_URL = "https://lagkkzzqjuwfevoceiaw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_XLH_4Q9-E7JDxmrDwrQSgQ_kBktuLwM";
 
@@ -38,306 +43,6 @@ const icons = {
 
 
 /* =========================================================
-   ファニーCSS
-========================================================= */
-
-function ensureFunnyStyles() {
-
-  if (document.getElementById("funny-app-style")) return;
-
-  const style = document.createElement("style");
-
-  style.id = "funny-app-style";
-
-  style.textContent = `
-
-    body {
-      overflow-x:hidden;
-    }
-
-    .funny-pop {
-      animation: funnyPop .35s ease;
-    }
-
-    @keyframes funnyPop {
-      0% { transform:scale(.75) rotate(-4deg); opacity:.2; }
-      70% { transform:scale(1.08) rotate(2deg); }
-      100% { transform:scale(1) rotate(0); opacity:1; }
-    }
-
-    .poop {
-      position:relative;
-      overflow:hidden;
-    }
-
-    .poop .emoji {
-      transition:transform .15s ease;
-    }
-
-    .poop:active .emoji {
-      transform:scale(1.5) rotate(15deg);
-    }
-
-    .splash {
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      overflow:visible;
-    }
-
-    .splash i {
-      position:absolute;
-      left:50%;
-      top:50%;
-      width:13px;
-      height:13px;
-      background:#8b5a3c;
-      border-radius:50%;
-      transform:translate(-50%,-50%) scale(0);
-      opacity:0;
-    }
-
-    .splash.active i:nth-child(1) {
-      animation:splash1 .7s ease-out;
-    }
-
-    .splash.active i:nth-child(2) {
-      animation:splash2 .7s ease-out;
-    }
-
-    .splash.active i:nth-child(3) {
-      animation:splash3 .7s ease-out;
-    }
-
-    .splash.active i:nth-child(4) {
-      animation:splash4 .7s ease-out;
-    }
-
-    .splash.active i:nth-child(5) {
-      animation:splash5 .7s ease-out;
-    }
-
-    .splash.active i:nth-child(6) {
-      animation:splash6 .7s ease-out;
-    }
-
-    @keyframes splash1 {
-      to {
-        transform:translate(-100px,-90px) scale(1);
-        opacity:0;
-      }
-    }
-
-    @keyframes splash2 {
-      to {
-        transform:translate(100px,-80px) scale(.7);
-        opacity:0;
-      }
-    }
-
-    @keyframes splash3 {
-      to {
-        transform:translate(-120px,30px) scale(.9);
-        opacity:0;
-      }
-    }
-
-    @keyframes splash4 {
-      to {
-        transform:translate(110px,45px) scale(.6);
-        opacity:0;
-      }
-    }
-
-    @keyframes splash5 {
-      to {
-        transform:translate(-40px,-120px) scale(.7);
-        opacity:0;
-      }
-    }
-
-    @keyframes splash6 {
-      to {
-        transform:translate(55px,110px) scale(.8);
-        opacity:0;
-      }
-    }
-
-    .poop-screen {
-      position:fixed;
-      inset:0;
-      z-index:10000;
-      pointer-events:none;
-      overflow:hidden;
-    }
-
-    .flying-poop {
-      position:absolute;
-      font-size:42px;
-      animation:flyPoop 1.1s cubic-bezier(.15,.8,.3,1) forwards;
-    }
-
-    @keyframes flyPoop {
-      0% {
-        transform:translate(-50%,-50%) scale(.2) rotate(0);
-        opacity:1;
-      }
-      70% {
-        opacity:1;
-      }
-      100% {
-        transform:
-          translate(
-            calc(-50% + var(--x)),
-            calc(-50% + var(--y))
-          )
-          scale(var(--s))
-          rotate(var(--r));
-        opacity:0;
-      }
-    }
-
-    .edit-btn,
-    .delete-btn {
-      border:0;
-      border-radius:12px;
-      padding:7px 10px;
-      font-weight:900;
-      cursor:pointer;
-      margin-left:4px;
-    }
-
-    .edit-btn {
-      background:#eee7ff;
-    }
-
-    .delete-btn {
-      background:#ffe1e1;
-      color:#b33;
-    }
-
-    .entry-actions {
-      margin-top:7px;
-      display:flex;
-      justify-content:flex-end;
-    }
-
-    .calendar-event-list {
-      margin-top:12px;
-    }
-
-    .calendar-event {
-      padding:12px;
-      border-radius:16px;
-      background:#faf7ff;
-      margin:7px 0;
-      border:2px solid #eee8f8;
-      cursor:pointer;
-    }
-
-    .calendar-event:hover {
-      transform:translateY(-1px);
-    }
-
-    .calendar-event.checkup {
-      background:#fff3fa;
-      border-color:#ffd4e9;
-    }
-
-    .doctor-question {
-      padding:13px;
-      border-radius:17px;
-      background:#faf7ff;
-      margin:8px 0;
-      border:2px solid #eee8f8;
-    }
-
-    .doctor-question.done {
-      opacity:.6;
-    }
-
-    .doctor-question.done .question-text {
-      text-decoration:line-through;
-    }
-
-    .mini-actions {
-      display:flex;
-      justify-content:flex-end;
-      gap:5px;
-      flex-wrap:wrap;
-      margin-top:7px;
-    }
-
-    .mini-btn {
-      border:0;
-      border-radius:11px;
-      padding:6px 9px;
-      font-weight:900;
-      cursor:pointer;
-    }
-
-    .mini-btn.edit {
-      background:#eee7ff;
-    }
-
-    .mini-btn.delete {
-      background:#ffe0e0;
-      color:#b33;
-    }
-
-    .mini-btn.done {
-      background:#e4f8e9;
-      color:#286b38;
-    }
-
-    .calendar .day {
-      min-height:78px;
-    }
-
-    .calendar .dot {
-      display:inline-block;
-      font-size:15px;
-      margin:1px;
-    }
-
-    .calendar-event-title {
-      font-weight:1000;
-      font-size:16px;
-    }
-
-    .calendar-event-time {
-      font-size:12px;
-      color:#8e8296;
-      margin-top:3px;
-    }
-
-    .record-detail {
-      margin-top:4px;
-      font-size:12px;
-      color:#8e8296;
-    }
-
-    .funny-title {
-      font-size:28px;
-      font-weight:1000;
-      text-align:center;
-      margin:8px 0 16px;
-    }
-
-    .empty-funny {
-      text-align:center;
-      padding:25px 10px;
-      color:#9b8da3;
-      font-weight:900;
-    }
-
-  `;
-
-  document.head.appendChild(style);
-}
-
-
-/* =========================================================
    共通
 ========================================================= */
 
@@ -349,35 +54,48 @@ const esc = s =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 
-const dk = d =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const dk = d => {
+  const x = new Date(d);
+
+  return `${x.getFullYear()}-${String(
+    x.getMonth() + 1
+  ).padStart(2, "0")}-${String(
+    x.getDate()
+  ).padStart(2, "0")}`;
+};
 
 const fmt = s => {
-
   if (!s) return "-";
 
-  const d = new Date(s + "T00:00:00");
+  const d = new Date(
+    String(s).includes("T")
+      ? s
+      : `${s}T00:00:00`
+  );
 
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 };
 
-const tm = s =>
-  new Date(s).toLocaleTimeString("ja-JP", {
+const tm = s => {
+  if (!s) return "";
+
+  return new Date(s).toLocaleTimeString("ja-JP", {
     hour: "2-digit",
     minute: "2-digit"
   });
+};
 
-const dateTimeLocal = s => {
-
+function localDateTimeValue(s) {
   if (!s) return "";
 
   const d = new Date(s);
 
-  const pad = n =>
-    String(n).padStart(2, "0");
+  const local = new Date(
+    d.getTime() - d.getTimezoneOffset() * 60000
+  );
 
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-};
+  return local.toISOString().slice(0, 16);
+}
 
 function flash(text) {
 
@@ -393,12 +111,13 @@ function flash(text) {
     transform:translateX(-50%);
     background:#392d42;
     color:#fff;
-    padding:12px 18px;
+    padding:13px 18px;
     border-radius:18px;
     font-weight:900;
-    box-shadow:0 8px 25px #0003;
+    box-shadow:0 8px 30px #0004;
     max-width:90%;
     text-align:center;
+    font-size:14px;
   `;
 
   document.body.appendChild(x);
@@ -407,7 +126,69 @@ function flash(text) {
 }
 
 
+/* =========================================================
+   💩 ファニーウンチ演出
+========================================================= */
+
+function poopExplosion() {
+
+  const emojis = [
+    "💩",
+    "💩",
+    "💩",
+    "🟤",
+    "💩",
+    "💩",
+    "🟫",
+    "💩",
+    "💩",
+    "🤎",
+    "💩",
+    "💩"
+  ];
+
+  emojis.forEach((emoji, i) => {
+
+    const x = document.createElement("div");
+
+    x.textContent = emoji;
+
+    const angle =
+      (Math.PI * 2 / emojis.length) * i;
+
+    const distance =
+      120 + Math.random() * 180;
+
+    x.style = `
+      position:fixed;
+      z-index:99998;
+      left:50%;
+      top:48%;
+      font-size:${28 + Math.random() * 32}px;
+      pointer-events:none;
+      transform:translate(-50%,-50%);
+      animation:poopFly .9s cubic-bezier(.2,.8,.2,1) forwards;
+      --x:${Math.cos(angle) * distance}px;
+      --y:${Math.sin(angle) * distance}px;
+      --r:${Math.random() * 720 - 360}deg;
+    `;
+
+    document.body.appendChild(x);
+
+    setTimeout(() => x.remove(), 1000);
+  });
+}
+
+
+/* =========================================================
+   モーダル
+========================================================= */
+
 function modal(title, html) {
+
+  const old = document.querySelector(".overlay");
+
+  if (old) old.remove();
 
   const o = document.createElement("div");
 
@@ -429,94 +210,313 @@ function modal(title, html) {
   `;
 
   o.onclick = e => {
-
     if (e.target === o) {
       o.remove();
     }
-
   };
 
   document.body.appendChild(o);
 }
-
 
 function closeModal() {
   document.querySelector(".overlay")?.remove();
 }
 
 
-function askDelete(message, callback) {
-
-  if (
-    confirm(
-      message ||
-      "この記録を削除しますか？"
-    )
-  ) {
-    callback();
-  }
-}
-
-
 /* =========================================================
-   ウンチ画面演出
+   CSS追加
 ========================================================= */
 
-function poopExplosion() {
+function injectExtraCSS() {
 
-  const screen =
-    document.createElement("div");
+  if (document.getElementById("app-extra-css")) return;
 
-  screen.className = "poop-screen";
+  const style = document.createElement("style");
 
-  for (let i = 0; i < 28; i++) {
+  style.id = "app-extra-css";
 
-    const p =
-      document.createElement("div");
+  style.textContent = `
 
-    p.className = "flying-poop";
+    * {
+      box-sizing:border-box;
+    }
 
-    p.textContent =
-      ["💩", "🟤", "💩", "💩"][Math.floor(Math.random() * 4)];
+    html,body {
+      margin:0;
+      padding:0;
+      width:100%;
+      max-width:100%;
+      overflow-x:hidden;
+    }
 
-    p.style.left =
-      `${50 + (Math.random() * 10 - 5)}%`;
+    body {
+      padding-bottom:90px;
+    }
 
-    p.style.top =
-      `${50 + (Math.random() * 10 - 5)}%`;
+    button,
+    input,
+    select,
+    textarea {
+      font:inherit;
+    }
 
-    p.style.setProperty(
-      "--x",
-      `${Math.random() * 220 - 110}vw`
-    );
+    button {
+      -webkit-tap-highlight-color:transparent;
+    }
 
-    p.style.setProperty(
-      "--y",
-      `${Math.random() * 180 - 90}vh`
-    );
+    .hero {
+      position:relative;
+      overflow:hidden;
+    }
 
-    p.style.setProperty(
-      "--s",
-      `${0.5 + Math.random() * 1.5}`
-    );
+    .hero .toilet {
+      display:none !important;
+    }
 
-    p.style.setProperty(
-      "--r",
-      `${Math.random() * 1000 - 500}deg`
-    );
+    .notice {
+      color:#5b416b !important;
+      background:#fff2a8 !important;
+      border:2px solid #f1d96b;
+      text-shadow:none !important;
+    }
 
-    p.style.animationDelay =
-      `${Math.random() * .18}s`;
+    .nav {
+      position:fixed !important;
+      left:0 !important;
+      right:0 !important;
+      bottom:0 !important;
+      width:100% !important;
+      max-width:100% !important;
+      z-index:9990;
+      display:grid !important;
+      grid-template-columns:repeat(4,1fr) !important;
+      padding:8px 8px calc(8px + env(safe-area-inset-bottom)) !important;
+      gap:5px !important;
+      box-sizing:border-box !important;
+    }
 
-    screen.appendChild(p);
-  }
+    .nav button {
+      min-width:0 !important;
+      width:100% !important;
+      padding:7px 2px !important;
+      font-size:11px !important;
+      white-space:nowrap;
+    }
 
-  document.body.appendChild(screen);
+    .nav button span {
+      display:block;
+      font-size:21px;
+      line-height:22px;
+      margin-bottom:2px;
+    }
 
-  setTimeout(
-    () => screen.remove(),
-    1500
-  );
+    .panel {
+      width:100%;
+      max-width:720px;
+      margin:0 auto;
+      padding-left:12px !important;
+      padding-right:12px !important;
+    }
+
+    .card {
+      width:100%;
+      max-width:100%;
+      overflow:hidden;
+    }
+
+    .stats {
+      display:grid !important;
+      grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+      gap:7px !important;
+    }
+
+    .stat {
+      min-width:0;
+      overflow:hidden;
+    }
+
+    .stat b {
+      font-size:18px;
+    }
+
+    .stat small {
+      font-size:10px;
+    }
+
+    .quick-grid {
+      display:grid !important;
+      grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+      gap:8px !important;
+    }
+
+    .poop-grid {
+      display:grid !important;
+      grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+      gap:10px !important;
+    }
+
+    .med-grid {
+      display:grid !important;
+      grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+      gap:8px !important;
+    }
+
+    .calendar {
+      width:100%;
+      display:grid !important;
+      grid-template-columns:repeat(7,minmax(0,1fr)) !important;
+      gap:3px !important;
+    }
+
+    .day {
+      min-width:0 !important;
+      min-height:67px !important;
+      padding:5px 2px !important;
+      overflow:hidden;
+    }
+
+    .day .dot {
+      font-size:12px;
+      display:inline-block;
+    }
+
+    .tabs {
+      display:flex;
+      overflow-x:auto;
+      gap:6px;
+      padding-bottom:5px;
+      scrollbar-width:none;
+    }
+
+    .tabs::-webkit-scrollbar {
+      display:none;
+    }
+
+    .tab {
+      flex:0 0 auto;
+    }
+
+    .record-actions {
+      display:flex;
+      gap:5px;
+      margin-top:7px;
+    }
+
+    .record-actions button {
+      flex:1;
+      border:0;
+      border-radius:10px;
+      padding:7px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .edit-mini {
+      background:#eee7ff;
+      color:#654b91;
+    }
+
+    .delete-mini {
+      background:#ffe4e4;
+      color:#b53b3b;
+    }
+
+    .event-item,
+    .checkup-item,
+    .question-item {
+      background:#faf7ff;
+      border-radius:16px;
+      padding:12px;
+      margin:8px 0;
+    }
+
+    .event-date {
+      font-size:12px;
+      font-weight:900;
+      color:#886b99;
+    }
+
+    .event-title {
+      font-size:16px;
+      font-weight:1000;
+      margin-top:3px;
+    }
+
+    .question-done {
+      opacity:.55;
+      text-decoration:line-through;
+    }
+
+    .mini-btn {
+      border:0;
+      border-radius:10px;
+      padding:7px 10px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .mini-edit {
+      background:#ece4ff;
+    }
+
+    .mini-delete {
+      background:#ffe0e0;
+    }
+
+    .mini-done {
+      background:#dff7e7;
+    }
+
+    .family-history-list {
+      max-height:55vh;
+      overflow-y:auto;
+    }
+
+    @keyframes poopFly {
+      0% {
+        opacity:1;
+        transform:translate(-50%,-50%) scale(.3) rotate(0);
+      }
+
+      70% {
+        opacity:1;
+      }
+
+      100% {
+        opacity:0;
+        transform:
+          translate(
+            calc(-50% + var(--x)),
+            calc(-50% + var(--y))
+          )
+          scale(1.15)
+          rotate(var(--r));
+      }
+    }
+
+    @media(max-width:380px) {
+
+      .stats {
+        gap:4px !important;
+      }
+
+      .stat b {
+        font-size:15px;
+      }
+
+      .quick-grid {
+        gap:6px !important;
+      }
+
+      .nav button {
+        font-size:10px !important;
+      }
+
+    }
+
+  `;
+
+  document.head.appendChild(style);
 }
 
 
@@ -526,7 +526,7 @@ function poopExplosion() {
 
 async function boot() {
 
-  ensureFunnyStyles();
+  injectExtraCSS();
 
   if (!configured) {
     config();
@@ -558,7 +558,7 @@ async function boot() {
 
 
 /* =========================================================
-   プロフィール
+   Profile
 ========================================================= */
 
 async function loadProfile() {
@@ -566,19 +566,15 @@ async function loadProfile() {
   const {
     data,
     error
-  } =
-    await sb
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .maybeSingle();
+  } = await sb
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .maybeSingle();
 
   if (error) {
-
     console.error(error);
-
     profile = null;
-
     return;
   }
 
@@ -587,82 +583,84 @@ async function loadProfile() {
 
 
 /* =========================================================
-   家族・妊娠
+   Family / Pregnancy
 ========================================================= */
 
 async function loadFamily() {
 
   if (!profile?.family_id) {
-
     family = null;
     pregnancy = null;
-
     return;
   }
 
   const {
-    data: f
-  } =
-    await sb
-      .from("families")
-      .select("*")
-      .eq("id", profile.family_id)
-      .maybeSingle();
+    data: f,
+    error: familyError
+  } = await sb
+    .from("families")
+    .select("*")
+    .eq("id", profile.family_id)
+    .maybeSingle();
+
+  if (familyError) {
+    console.error(familyError);
+  }
 
   family = f || null;
 
+  /*
+    現在の pregnancies テーブルで確実に存在する
+    family_id / due_date のみ利用する
+  */
 
   const {
-    data: pregnancies
-  } =
-    await sb
-      .from("pregnancies")
-      .select("*")
-      .eq(
-        "family_id",
-        profile.family_id
-      )
-      .order(
-        "due_date",
-        { ascending: false }
-      )
-      .limit(1);
+    data: p,
+    error: pregnancyError
+  } = await sb
+    .from("pregnancies")
+    .select("*")
+    .eq("family_id", profile.family_id)
+    .order("due_date", { ascending: true })
+    .limit(1)
+    .maybeSingle();
 
-  pregnancy =
-    pregnancies?.[0] || null;
+  if (pregnancyError) {
+    console.error(pregnancyError);
+  }
+
+  pregnancy = p || null;
 }
 
 
 /* =========================================================
-   設定エラー
+   Config
 ========================================================= */
 
 function config() {
 
   app.innerHTML = `
     <div class="auth">
-
       <div class="auth-card">
 
-        <h1>🌈 💩＆💊</h1>
+        <h1>💩＆💊</h1>
 
         <div class="notice">
           Supabase設定が必要です
         </div>
 
         <p class="hint">
-          app.js冒頭のSUPABASE_URLとSUPABASE_KEYを設定してください。
+          app.js冒頭の設定を確認してください。
         </p>
 
       </div>
-
     </div>
   `;
 }
 
 
 /* =========================================================
-   ログイン
+   Auth
 ========================================================= */
 
 function auth() {
@@ -720,22 +718,13 @@ function auth() {
 async function login() {
 
   const emailValue =
-    document
-      .getElementById("email")
-      ?.value
-      .trim();
+    document.getElementById("email")?.value.trim();
 
   const passValue =
-    document
-      .getElementById("pass")
-      ?.value;
+    document.getElementById("pass")?.value;
 
   if (!emailValue || !passValue) {
-
-    flash(
-      "メールアドレスとパスワードを入力してください"
-    );
-
+    flash("メールアドレスとパスワードを入力してください");
     return;
   }
 
@@ -746,9 +735,7 @@ async function login() {
     });
 
   if (error) {
-
     flash(error.message);
-
     return;
   }
 
@@ -759,38 +746,26 @@ async function login() {
 async function signup() {
 
   const emailValue =
-    document
-      .getElementById("email")
-      ?.value
-      .trim();
+    document.getElementById("email")?.value.trim();
 
   const passValue =
-    document
-      .getElementById("pass")
-      ?.value;
+    document.getElementById("pass")?.value;
 
   if (!emailValue || !passValue) {
-
-    flash(
-      "メールアドレスとパスワードを入力してください"
-    );
-
+    flash("メールアドレスとパスワードを入力してください");
     return;
   }
 
   const {
     data,
     error
-  } =
-    await sb.auth.signUp({
-      email: emailValue,
-      password: passValue
-    });
+  } = await sb.auth.signUp({
+    email: emailValue,
+    password: passValue
+  });
 
   if (error) {
-
     flash(error.message);
-
     return;
   }
 
@@ -798,12 +773,14 @@ async function signup() {
 
   if (user) {
     onboarding();
+  } else {
+    flash("確認メールを確認してください");
   }
 }
 
 
 /* =========================================================
-   初回登録
+   Onboarding
 ========================================================= */
 
 function onboarding() {
@@ -816,8 +793,8 @@ function onboarding() {
         <h1>🌈 はじめよう</h1>
 
         <p class="hint">
-          最初に登録する人が家族を作ります。<br>
-          もう一人は後から招待コードで参加できます。
+          家族を作る人は「家族を作る」。<br>
+          すでに家族がある場合は招待コードで参加できます。
         </p>
 
         <div class="form-grid">
@@ -825,18 +802,13 @@ function onboarding() {
           <input
             id="name"
             class="input"
-            placeholder="表示名（タカちゃん / オタヤダ）"
+            placeholder="表示名"
           >
 
           <select id="role" class="input">
 
-            <option value="wife">
-              👩 妻
-            </option>
-
-            <option value="husband">
-              👨 夫
-            </option>
+            <option value="wife">👩 妻</option>
+            <option value="husband">👨 夫</option>
 
           </select>
 
@@ -851,7 +823,7 @@ function onboarding() {
             class="btn primary"
             onclick="createFamily()"
           >
-            👩‍❤️‍👨 家族を作って開始
+            👩‍❤️‍👨 家族を作る
           </button>
 
           <div style="
@@ -887,33 +859,22 @@ function onboarding() {
 
 
 /* =========================================================
-   家族作成
+   Family Create
 ========================================================= */
 
 async function createFamily() {
 
   const n =
-    document
-      .getElementById("name")
-      ?.value
-      .trim();
+    document.getElementById("name")?.value.trim();
 
   const r =
-    document
-      .getElementById("role")
-      ?.value;
+    document.getElementById("role")?.value;
 
   const d =
-    document
-      .getElementById("due")
-      ?.value;
+    document.getElementById("due")?.value;
 
   if (!n || !d) {
-
-    flash(
-      "名前と予定日を入力してください"
-    );
-
+    flash("名前と予定日を入力してください");
     return;
   }
 
@@ -923,72 +884,56 @@ async function createFamily() {
       .substring(2, 8)
       .toUpperCase();
 
-
   const {
     data: f,
     error: familyError
-  } =
-    await sb
-      .from("families")
-      .insert({
-        family_name:
-          "タカちゃん＆オタヤダ",
-        invite_code:
-          inviteCode
-      })
-      .select()
-      .single();
+  } = await sb
+    .from("families")
+    .insert({
+      family_name: "タカちゃん＆オタヤダ",
+      invite_code: inviteCode
+    })
+    .select()
+    .single();
 
   if (familyError) {
-
     flash(familyError.message);
-
     return;
   }
-
 
   const {
     error: profileError
-  } =
-    await sb
-      .from("profiles")
-      .insert({
-        id: user.id,
-        family_id: f.id,
-        display_name: n,
-        role: r
-      });
+  } = await sb
+    .from("profiles")
+    .insert({
+      id: user.id,
+      family_id: f.id,
+      display_name: n,
+      role: r
+    });
 
   if (profileError) {
-
     flash(profileError.message);
-
     return;
   }
 
-
   const {
     error: pregnancyError
-  } =
-    await sb
-      .from("pregnancies")
-      .insert({
-        family_id: f.id,
-        mother_profile_id:
-          r === "wife"
-            ? user.id
-            : null,
-        due_date: d
-      });
+  } = await sb
+    .from("pregnancies")
+    .insert({
+      family_id: f.id,
+      mother_profile_id:
+        r === "wife" ? user.id : null,
+      due_date: d
+    });
 
   if (pregnancyError) {
-
     console.warn(
-      "pregnancy insert:",
-      pregnancyError
+      "妊娠情報保存:",
+      pregnancyError.message
     );
   }
-
 
   await loadProfile();
   await loadFamily();
@@ -1000,7 +945,7 @@ async function createFamily() {
 
 
 /* =========================================================
-   家族参加
+   Join Family
 ========================================================= */
 
 async function joinFamily() {
@@ -1024,95 +969,64 @@ async function joinFamily() {
       ?.value;
 
   if (!n) {
-
-    flash(
-      "表示名を入力してください"
-    );
-
+    flash("表示名を入力してください");
     return;
   }
 
   if (!code || code.length !== 6) {
-
-    flash(
-      "6文字の招待コードを入力してください"
-    );
-
+    flash("6文字の招待コードを入力してください");
     return;
   }
 
+  /*
+    familiesを直接SELECTしない。
+    RPCで招待コードを検索して参加する。
+  */
+
   const {
-    data: f,
+    data,
     error
-  } =
-    await sb
-      .from("families")
-      .select("*")
-      .eq(
-        "invite_code",
-        code
-      )
-      .maybeSingle();
+  } = await sb.rpc(
+    "join_family_by_invite_code",
+    {
+      p_invite_code: code,
+      p_display_name: n,
+      p_role: r
+    }
+  );
 
-  if (error || !f) {
-
-    flash(
-      "招待コードが見つかりません"
-    );
-
+  if (error) {
+    console.error(error);
+    flash(error.message);
     return;
   }
 
-
-  const {
-    error: profileError
-  } =
-    await sb
-      .from("profiles")
-      .insert({
-        id: user.id,
-        family_id: f.id,
-        display_name: n,
-        role: r
-      });
-
-  if (profileError) {
-
-    flash(
-      profileError.message
-    );
-
+  if (!data) {
+    flash("家族への参加に失敗しました");
     return;
   }
 
   await loadProfile();
   await loadFamily();
 
-  flash(
-    "👩‍❤️‍👨 家族に参加しました！"
-  );
+  flash("👩‍❤️‍👨 家族に参加しました！");
 
   render();
 }
 
 
 /* =========================================================
-   招待
+   Invite
 ========================================================= */
 
 async function showInvite() {
 
   if (!family) {
-
-    flash(
-      "家族情報がありません"
-    );
-
+    flash("家族情報がありません");
     return;
   }
 
-  let code =
-    family.invite_code;
+  let code = family.invite_code;
 
   if (!code) {
 
@@ -1128,31 +1042,23 @@ async function showInvite() {
         .update({
           invite_code: code
         })
-        .eq(
-          "id",
-          family.id
-        );
+        .eq("id", family.id);
 
     if (error) {
-
       flash(error.message);
-
       return;
     }
 
-    family.invite_code =
-      code;
+    family.invite_code = code;
   }
-
 
   modal(
     "👩‍❤️‍👨 家族に招待",
     `
-
       <div
         style="
-          font-size:42px;
-          letter-spacing:8px;
+          font-size:38px;
+          letter-spacing:7px;
           font-weight:1000;
           text-align:center;
           background:#f1eaff;
@@ -1169,7 +1075,7 @@ async function showInvite() {
         style="width:100%"
         onclick="copyInvite('${esc(code)}')"
       >
-        📋 招待コードをコピー
+        📋 コピー
       </button>
 
       <button
@@ -1177,9 +1083,8 @@ async function showInvite() {
         style="width:100%;margin-top:8px"
         onclick="shareInvite('${esc(code)}')"
       >
-        📤 共有する
+        📤 共有
       </button>
-
     `
   );
 }
@@ -1191,15 +1096,12 @@ async function copyInvite(code) {
 
     await navigator.clipboard.writeText(code);
 
-    flash(
-      "📋 コピーしました！"
-    );
+    flash("📋 コピーしました！");
 
   } catch {
 
-    flash(
-      "コード：" + code
-    );
+    flash("招待コード：" + code);
+
   }
 }
 
@@ -1223,7 +1125,8 @@ async function shareInvite(code) {
 
   } else {
 
-    await copyInvite(code);
+    copyInvite(code);
+
   }
 }
 
@@ -1241,88 +1144,71 @@ async function hr(
   const {
     data,
     error
-  } =
-    await sb
-      .from("health_records")
-      .insert({
-        family_id:
-          profile.family_id,
-        profile_id:
-          user.id,
-        record_type:
-          type,
-        recorded_at:
-          recordedAt ||
-          new Date().toISOString(),
-        comment
-      })
-      .select()
-      .single();
+  } = await sb
+    .from("health_records")
+    .insert({
+      family_id: profile.family_id,
+      profile_id: user.id,
+      record_type: type,
+      recorded_at:
+        recordedAt ||
+        new Date().toISOString(),
+      comment
+    })
+    .select()
+    .single();
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
   return data;
 }
 
 
 /* =========================================================
-   💩 ウンチ
+   💩 Poop
 ========================================================= */
 
-async function poopAdd(
-  type,
-  button
-) {
-
-  const splash =
-    button?.querySelector(".splash");
-
-  if (splash) {
-
-    splash.classList.remove("active");
-
-    void splash.offsetWidth;
-
-    splash.classList.add("active");
-  }
+async function poopAdd(type, button) {
 
   poopExplosion();
 
+  if (button) {
+
+    button.animate(
+      [
+        { transform: "scale(1)" },
+        { transform: "scale(1.18) rotate(-4deg)" },
+        { transform: "scale(.95) rotate(4deg)" },
+        { transform: "scale(1)" }
+      ],
+      {
+        duration:450,
+        easing:"ease-out"
+      }
+    );
+
+  }
+
   const comment =
-    prompt(
-      "💬 ウンチへのコメント（任意）"
-    ) ?? "";
+    prompt("💬 ウンチへのコメント（任意）") ?? "";
 
   try {
 
     const record =
-      await hr(
-        "poop",
-        comment
-      );
+      await hr("poop", comment);
 
-    const {
-      error
-    } =
+    const { error } =
       await sb
         .from("poop_records")
         .insert({
-          health_record_id:
-            record.id,
-          poop_type:
-            type,
+          health_record_id: record.id,
+          poop_type: type,
           comment
         });
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
-    flash(
-      "💩 ブワァァァ！！記録したよ！"
-    );
+    flash("💩 ブワァァァッ！！記録したよ！");
 
     render();
 
@@ -1339,7 +1225,7 @@ async function poopAdd(
 
 
 /* =========================================================
-   💊 薬一覧
+   💊 Medication
 ========================================================= */
 
 async function meds() {
@@ -1347,21 +1233,15 @@ async function meds() {
   const {
     data,
     error
-  } =
-    await sb
-      .from("medications")
-      .select("*")
-      .eq(
-        "family_id",
-        profile.family_id
-      )
-      .eq(
-        "is_active",
-        true
-      )
-      .order(
-        "created_at"
-      );
+  } = await sb
+    .from("medications")
+    .select("*")
+    .eq(
+      "family_id",
+      profile.family_id
+    )
+    .eq("is_active", true)
+    .order("created_at");
 
   if (error) {
 
@@ -1374,42 +1254,6 @@ async function meds() {
 }
 
 
-/* =========================================================
-   💊 服薬
-========================================================= */
-
-async function medAddById(id) {
-
-  const {
-    data: medicine,
-    error
-  } =
-    await sb
-      .from("medications")
-      .select("*")
-      .eq(
-        "id",
-        id
-      )
-      .maybeSingle();
-
-  if (error || !medicine) {
-
-    flash(
-      "薬が見つかりません"
-    );
-
-    return;
-  }
-
-  medAdd(
-    medicine.id,
-    medicine.name,
-    medicine.icon || "💊"
-  );
-}
-
-
 async function medAdd(
   id,
   name,
@@ -1419,25 +1263,17 @@ async function medAdd(
   try {
 
     const record =
-      await hr(
-        "medicine"
-      );
+      await hr("medicine");
 
-    const {
-      error
-    } =
+    const { error } =
       await sb
         .from("medication_logs")
         .insert({
-          health_record_id:
-            record.id,
-          medication_id:
-            id
+          health_record_id: record.id,
+          medication_id: id
         });
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
     flash(
       `${icon} ${name}を飲んだ！`
@@ -1455,16 +1291,11 @@ async function medAdd(
 }
 
 
-/* =========================================================
-   💊 サプリ追加
-========================================================= */
-
 function addMed() {
 
   modal(
     "💊 薬・サプリを追加",
     `
-
       <div class="form-grid">
 
         <input
@@ -1490,11 +1321,10 @@ function addMed() {
           class="btn primary"
           onclick="saveMed()"
         >
-          💊 追加する
+          ＋ 登録
         </button>
 
       </div>
-
     `
   );
 }
@@ -1503,173 +1333,131 @@ function addMed() {
 async function saveMed() {
 
   const name =
-    document
-      .getElementById("mn")
-      ?.value
-      .trim();
+    document.getElementById("mn")?.value.trim();
 
   const icon =
-    document
-      .getElementById("mi")
-      ?.value ||
+    document.getElementById("mi")?.value ||
     "💊";
 
   const description =
-    document
-      .getElementById("md")
-      ?.value ||
+    document.getElementById("md")?.value ||
     "";
 
   if (!name) {
-
-    flash(
-      "薬・サプリ名を入力してください"
-    );
-
+    flash("薬・サプリ名を入力してください");
     return;
   }
 
-  const {
-    error
-  } =
+  const { error } =
     await sb
       .from("medications")
       .insert({
-        family_id:
-          profile.family_id,
+        family_id: profile.family_id,
         name,
         icon,
         description,
-        is_active: true
+        is_active:true
       });
 
   if (error) {
-
-    flash(
-      error.message
-    );
-
+    flash(error.message);
     return;
   }
 
   closeModal();
 
-  flash(
-    "💊 追加しました"
-  );
+  flash("💊 登録しました");
 
   render();
 }
 
 
 /* =========================================================
-   💊 サプリ編集
+   Medication 編集
 ========================================================= */
 
-function editMed(id) {
-
-  loadMedicationForEdit(id);
-}
-
-
-async function loadMedicationForEdit(id) {
+async function editMedication(id) {
 
   const {
     data,
     error
-  } =
-    await sb
-      .from("medications")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
+  } = await sb
+    .from("medications")
+    .select("*")
+    .eq("id", id)
+    .single();
 
-  if (error || !data) {
-
-    flash(
-      "薬が見つかりません"
-    );
-
+  if (error) {
+    flash(error.message);
     return;
   }
 
   modal(
     "✏️ 薬・サプリを編集",
     `
-
       <div class="form-grid">
 
         <input
-          id="editMn"
+          id="editMedName"
           class="input"
           value="${esc(data.name)}"
         >
 
         <input
-          id="editMi"
+          id="editMedIcon"
           class="input"
           value="${esc(data.icon || "💊")}"
         >
 
         <input
-          id="editMd"
+          id="editMedDescription"
           class="input"
           value="${esc(data.description || "")}"
         >
 
         <button
           class="btn primary"
-          onclick="updateMed('${id}')"
+          onclick="updateMedication('${id}')"
         >
           💾 保存
         </button>
 
         <button
           class="btn danger"
-          onclick="deleteMed('${id}')"
+          onclick="deleteMedication('${id}')"
         >
-          🗑️ この薬・サプリを削除
+          🗑️ 削除
         </button>
 
       </div>
-
     `
   );
 }
 
 
-async function updateMed(id) {
+async function updateMedication(id) {
 
   const name =
     document
-      .getElementById("editMn")
-      ?.value
-      .trim();
+      .getElementById("editMedName")
+      ?.value.trim();
 
   const icon =
     document
-      .getElementById("editMi")
-      ?.value ||
-    "💊";
+      .getElementById("editMedIcon")
+      ?.value || "💊";
 
   const description =
     document
-      .getElementById("editMd")
-      ?.value ||
-    "";
+      .getElementById("editMedDescription")
+      ?.value || "";
 
   if (!name) {
-
-    flash(
-      "名前を入力してください"
-    );
-
+    flash("名前を入力してください");
     return;
   }
 
-  const {
-    error
-  } =
+  const { error } =
     await sb
       .from("medications")
       .update({
@@ -1677,72 +1465,55 @@ async function updateMed(id) {
         icon,
         description
       })
-      .eq(
-        "id",
-        id
-      );
+      .eq("id", id);
 
   if (error) {
-
-    flash(
-      error.message
-    );
-
+    flash(error.message);
     return;
   }
 
   closeModal();
 
-  flash(
-    "💊 更新しました"
-  );
+  flash("💊 更新しました");
 
   render();
 }
 
 
-async function deleteMed(id) {
+async function deleteMedication(id) {
 
-  askDelete(
-    "この薬・サプリを削除しますか？\n過去の服薬記録は残ります。",
-    async () => {
+  if (!confirm(
+    "この薬・サプリを登録一覧から削除しますか？"
+  )) return;
 
-      const {
-        error
-      } =
-        await sb
-          .from("medications")
-          .update({
-            is_active: false
-          })
-          .eq(
-            "id",
-            id
-          );
+  /*
+    履歴を壊さないため、
+    medication_logsがある薬はis_active=falseにする。
+  */
 
-      if (error) {
+  const { error } =
+    await sb
+      .from("medications")
+      .update({
+        is_active:false
+      })
+      .eq("id", id);
 
-        flash(
-          error.message
-        );
+  if (error) {
+    flash(error.message);
+    return;
+  }
 
-        return;
-      }
+  closeModal();
 
-      closeModal();
+  flash("🗑️ 削除しました");
 
-      flash(
-        "🗑️ 削除しました"
-      );
-
-      render();
-    }
-  );
+  render();
 }
 
 
 /* =========================================================
-   🤢 吐いた
+   🤢 Vomit
 ========================================================= */
 
 function addVomit() {
@@ -1750,14 +1521,13 @@ function addVomit() {
   modal(
     "🤢 吐いた記録",
     `
-
       <div class="form-grid">
 
         <input
-          id="vomitDate"
+          id="vomitDateTime"
           class="input"
           type="datetime-local"
-          value="${dateTimeLocal(new Date().toISOString())}"
+          value="${localDateTimeValue(new Date())}"
         >
 
         <select
@@ -1765,25 +1535,11 @@ function addVomit() {
           class="input"
         >
 
-          <option value="1">
-            😌 軽い
-          </option>
-
-          <option value="2">
-            😐 少しつらい
-          </option>
-
-          <option value="3" selected>
-            😵 普通
-          </option>
-
-          <option value="4">
-            😫 かなりつらい
-          </option>
-
-          <option value="5">
-            🤮 とてもつらい
-          </option>
+          <option value="1">😌 軽い</option>
+          <option value="2">😐 少しつらい</option>
+          <option value="3" selected>😵 普通</option>
+          <option value="4">😫 かなりつらい</option>
+          <option value="5">🤮 とてもつらい</option>
 
         </select>
 
@@ -1801,7 +1557,6 @@ function addVomit() {
         </button>
 
       </div>
-
     `
   );
 }
@@ -1811,27 +1566,20 @@ async function saveVomit() {
 
   const severity =
     Number(
-      document
-        .getElementById(
-          "vomitSeverity"
-        )
-        ?.value
+      document.getElementById(
+        "vomitSeverity"
+      )?.value
     );
 
   const comment =
-    document
-      .getElementById(
-        "vomitComment"
-      )
-      ?.value ||
-    "";
+    document.getElementById(
+      "vomitComment"
+    )?.value || "";
 
-  const dt =
-    document
-      .getElementById(
-        "vomitDate"
-      )
-      ?.value;
+  const recordedAt =
+    document.getElementById(
+      "vomitDateTime"
+    )?.value;
 
   try {
 
@@ -1839,36 +1587,29 @@ async function saveVomit() {
       await hr(
         "vomit",
         comment,
-        dt
-          ? new Date(dt).toISOString()
+        recordedAt
+          ? new Date(recordedAt).toISOString()
           : null
       );
 
-    const {
-      error
-    } =
+    const { error } =
       await sb
         .from("vomit_records")
         .insert({
-          health_record_id:
-            record.id,
+          health_record_id:record.id,
           severity,
           comment
         });
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
     closeModal();
 
-    flash(
-      "🤢 記録したよ"
-    );
+    flash("🤢 記録したよ");
 
     render();
 
-  } catch (e) {
+  } catch(e) {
 
     flash(
       "記録できませんでした：" +
@@ -1879,7 +1620,7 @@ async function saveVomit() {
 
 
 /* =========================================================
-   ⚖️ 体重
+   ⚖️ Weight
 ========================================================= */
 
 function addWeight() {
@@ -1887,14 +1628,13 @@ function addWeight() {
   modal(
     "⚖️ 体重を記録",
     `
-
       <div class="form-grid">
 
         <input
-          id="weightDate"
+          id="weightDateTime"
           class="input"
           type="datetime-local"
-          value="${dateTimeLocal(new Date().toISOString())}"
+          value="${localDateTimeValue(new Date())}"
         >
 
         <input
@@ -1919,7 +1659,6 @@ function addWeight() {
         </button>
 
       </div>
-
     `
   );
 }
@@ -1929,34 +1668,23 @@ async function saveWeight() {
 
   const weight =
     parseFloat(
-      document
-        .getElementById(
-          "weightValue"
-        )
-        ?.value
+      document.getElementById(
+        "weightValue"
+      )?.value
     );
 
   const comment =
-    document
-      .getElementById(
-        "weightComment"
-      )
-      ?.value ||
-    "";
+    document.getElementById(
+      "weightComment"
+    )?.value || "";
 
-  const dt =
-    document
-      .getElementById(
-        "weightDate"
-      )
-      ?.value;
+  const recordedAt =
+    document.getElementById(
+      "weightDateTime"
+    )?.value;
 
   if (!weight) {
-
-    flash(
-      "体重を入力してください"
-    );
-
+    flash("体重を入力してください");
     return;
   }
 
@@ -1966,37 +1694,29 @@ async function saveWeight() {
       await hr(
         "weight",
         comment,
-        dt
-          ? new Date(dt).toISOString()
+        recordedAt
+          ? new Date(recordedAt).toISOString()
           : null
       );
 
-    const {
-      error
-    } =
+    const { error } =
       await sb
         .from("weight_records")
         .insert({
-          health_record_id:
-            record.id,
-          weight_kg:
-            weight,
+          health_record_id:record.id,
+          weight_kg:weight,
           comment
         });
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
     closeModal();
 
-    flash(
-      "⚖️ 保存したよ"
-    );
+    flash("⚖️ 保存したよ");
 
     render();
 
-  } catch (e) {
+  } catch(e) {
 
     flash(
       "体重を保存できませんでした：" +
@@ -2007,7 +1727,7 @@ async function saveWeight() {
 
 
 /* =========================================================
-   🌸 生理
+   🌸 Period
 ========================================================= */
 
 function addPeriod() {
@@ -2015,14 +1735,13 @@ function addPeriod() {
   modal(
     "🌸 生理を記録",
     `
-
       <div class="form-grid">
 
         <input
-          id="periodDate"
+          id="periodDateTime"
           class="input"
           type="datetime-local"
-          value="${dateTimeLocal(new Date().toISOString())}"
+          value="${localDateTimeValue(new Date())}"
         >
 
         <select
@@ -2030,17 +1749,9 @@ function addPeriod() {
           class="input"
         >
 
-          <option value="start">
-            🌸 生理開始
-          </option>
-
-          <option value="end">
-            🌸 生理終了
-          </option>
-
-          <option value="pain">
-            😖 生理痛
-          </option>
+          <option value="start">🌸 生理開始</option>
+          <option value="end">🌸 生理終了</option>
+          <option value="pain">😖 生理痛</option>
 
         </select>
 
@@ -2049,17 +1760,9 @@ function addPeriod() {
           class="input"
         >
 
-          <option value="1">
-            少ない
-          </option>
-
-          <option value="2" selected>
-            普通
-          </option>
-
-          <option value="3">
-            多い
-          </option>
+          <option value="1">少ない</option>
+          <option value="2" selected>普通</option>
+          <option value="3">多い</option>
 
         </select>
 
@@ -2077,7 +1780,6 @@ function addPeriod() {
         </button>
 
       </div>
-
     `
   );
 }
@@ -2086,35 +1788,26 @@ function addPeriod() {
 async function savePeriod() {
 
   const type =
-    document
-      .getElementById(
-        "periodType"
-      )
-      ?.value;
+    document.getElementById(
+      "periodType"
+    )?.value;
 
   const level =
     Number(
-      document
-        .getElementById(
-          "periodLevel"
-        )
-        ?.value
+      document.getElementById(
+        "periodLevel"
+      )?.value
     );
 
   const comment =
-    document
-      .getElementById(
-        "periodComment"
-      )
-      ?.value ||
-    "";
+    document.getElementById(
+      "periodComment"
+    )?.value || "";
 
-  const dt =
-    document
-      .getElementById(
-        "periodDate"
-      )
-      ?.value;
+  const recordedAt =
+    document.getElementById(
+      "periodDateTime"
+    )?.value;
 
   try {
 
@@ -2122,41 +1815,30 @@ async function savePeriod() {
       await hr(
         "period",
         comment,
-        dt
-          ? new Date(dt).toISOString()
+        recordedAt
+          ? new Date(recordedAt).toISOString()
           : null
       );
 
-    const {
-      error
-    } =
+    const { error } =
       await sb
         .from("period_records")
         .insert({
-          health_record_id:
-            record.id,
-          period_type:
-            type,
-          flow_level:
-            level,
+          health_record_id:record.id,
+          period_type:type,
+          flow_level:level,
           comment
         });
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
     closeModal();
 
-    flash(
-      "🌸 生理記録を保存しました"
-    );
+    flash("🌸 生理記録を保存しました");
 
     render();
 
-  } catch (e) {
-
-    console.error(e);
+  } catch(e) {
 
     flash(
       "生理記録に失敗：" +
@@ -2167,78 +1849,442 @@ async function savePeriod() {
 
 
 /* =========================================================
-   📒 今日の記録
+   📒 Health Record 編集
 ========================================================= */
 
-async function dayRecords(
-  targetDate
-) {
+async function editHealthRecord(id) {
 
   const {
     data,
     error
-  } =
+  } = await sb
+    .from("health_records")
+    .select(`
+      *,
+      poop_records(*),
+      medication_logs(
+        *,
+        medications(*)
+      ),
+      vomit_records(*),
+      weight_records(*),
+      period_records(*)
+    `)
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    flash(error.message);
+    return;
+  }
+
+  const type = data.record_type;
+
+  let extra = "";
+
+  if (type === "poop") {
+
+    const value =
+      data.poop_records?.[0]?.poop_type ||
+      "banana";
+
+    extra = `
+      <select
+        id="editPoopType"
+        class="input"
+      >
+        ${Object.entries(poop).map(
+          ([key, val]) => `
+            <option
+              value="${key}"
+              ${key === value ? "selected" : ""}
+            >
+              ${val[1]} ${val[0]}
+            </option>
+          `
+        ).join("")}
+      </select>
+    `;
+
+  } else if (type === "medicine") {
+
+    const medsList = await meds();
+
+    const current =
+      data.medication_logs?.[0]?.medication_id;
+
+    extra = `
+      <select
+        id="editMedicineId"
+        class="input"
+      >
+        ${medsList.map(
+          m => `
+            <option
+              value="${m.id}"
+              ${m.id === current ? "selected" : ""}
+            >
+              ${esc(m.icon || "💊")}
+              ${esc(m.name)}
+            </option>
+          `
+        ).join("")}
+      </select>
+    `;
+
+  } else if (type === "vomit") {
+
+    const severity =
+      data.vomit_records?.[0]?.severity || 3;
+
+    extra = `
+      <select
+        id="editVomitSeverity"
+        class="input"
+      >
+        ${[1,2,3,4,5].map(
+          n => `
+            <option
+              value="${n}"
+              ${n === severity ? "selected" : ""}
+            >
+              ${"★".repeat(n)}
+            </option>
+          `
+        ).join("")}
+      </select>
+    `;
+
+  } else if (type === "weight") {
+
+    const weight =
+      data.weight_records?.[0]?.weight_kg || "";
+
+    extra = `
+      <input
+        id="editWeight"
+        class="input"
+        type="number"
+        step="0.1"
+        value="${weight}"
+      >
+    `;
+
+  } else if (type === "period") {
+
+    const p =
+      data.period_records?.[0];
+
+    extra = `
+      <select
+        id="editPeriodType"
+        class="input"
+      >
+        <option value="start"
+          ${p?.period_type === "start" ? "selected" : ""}
+        >
+          🌸 生理開始
+        </option>
+
+        <option value="end"
+          ${p?.period_type === "end" ? "selected" : ""}
+        >
+          🌸 生理終了
+        </option>
+
+        <option value="pain"
+          ${p?.period_type === "pain" ? "selected" : ""}
+        >
+          😖 生理痛
+        </option>
+      </select>
+    `;
+  }
+
+  modal(
+    "✏️ 記録を編集",
+    `
+      <div class="form-grid">
+
+        <label>
+          日時
+        </label>
+
+        <input
+          id="editRecordDate"
+          class="input"
+          type="datetime-local"
+          value="${localDateTimeValue(data.recorded_at)}"
+        >
+
+        ${extra}
+
+        <textarea
+          id="editRecordComment"
+          class="input textarea"
+        >${esc(data.comment || "")}</textarea>
+
+        <button
+          class="btn primary"
+          onclick="updateHealthRecord('${id}','${type}')"
+        >
+          💾 保存
+        </button>
+
+        <button
+          class="btn danger"
+          onclick="deleteHealthRecord('${id}')"
+        >
+          🗑️ この記録を削除
+        </button>
+
+      </div>
+    `
+  );
+}
+
+
+async function updateHealthRecord(id, type) {
+
+  const recorded =
+    document.getElementById(
+      "editRecordDate"
+    )?.value;
+
+  const comment =
+    document.getElementById(
+      "editRecordComment"
+    )?.value || "";
+
+  const { error } =
     await sb
       .from("health_records")
-      .select(`
-        id,
-        profile_id,
-        record_type,
-        recorded_at,
-        comment,
+      .update({
+        recorded_at:
+          recorded
+            ? new Date(recorded).toISOString()
+            : new Date().toISOString(),
+        comment
+      })
+      .eq("id", id);
 
-        poop_records(
-          poop_type,
-          comment
-        ),
+  if (error) {
+    flash(error.message);
+    return;
+  }
 
-        medication_logs(
-          medication_id,
-          dose,
-          comment,
-          medications(
-            name,
-            icon
-          )
-        ),
+  if (type === "poop") {
 
-        vomit_records(
-          severity,
-          comment
-        ),
+    const value =
+      document.getElementById(
+        "editPoopType"
+      )?.value;
 
-        weight_records(
-          weight_kg,
-          comment
-        ),
+    await sb
+      .from("poop_records")
+      .update({
+        poop_type:value,
+        comment
+      })
+      .eq("health_record_id", id);
 
-        period_records(
-          period_type,
-          flow_level,
-          pain_level,
-          comment
-        )
-      `)
-      .eq(
-        "family_id",
-        profile.family_id
-      )
-      .gte(
-        "recorded_at",
-        targetDate +
-        "T00:00:00"
-      )
-      .lt(
-        "recorded_at",
-        targetDate +
-        "T23:59:59.999"
-      )
-      .order(
-        "recorded_at",
-        {
-          ascending:false
-        }
+  } else if (type === "medicine") {
+
+    const medicationId =
+      document.getElementById(
+        "editMedicineId"
+      )?.value;
+
+    await sb
+      .from("medication_logs")
+      .update({
+        medication_id:medicationId
+      })
+      .eq("health_record_id", id);
+
+  } else if (type === "vomit") {
+
+    const severity =
+      Number(
+        document.getElementById(
+          "editVomitSeverity"
+        )?.value
       );
+
+    await sb
+      .from("vomit_records")
+      .update({
+        severity,
+        comment
+      })
+      .eq("health_record_id", id);
+
+  } else if (type === "weight") {
+
+    const weight =
+      parseFloat(
+        document.getElementById(
+          "editWeight"
+        )?.value
+      );
+
+    await sb
+      .from("weight_records")
+      .update({
+        weight_kg:weight,
+        comment
+      })
+      .eq("health_record_id", id);
+
+  } else if (type === "period") {
+
+    const periodType =
+      document.getElementById(
+        "editPeriodType"
+      )?.value;
+
+    await sb
+      .from("period_records")
+      .update({
+        period_type:periodType,
+        comment
+      })
+      .eq("health_record_id", id);
+  }
+
+  closeModal();
+
+  flash("✏️ 更新しました");
+
+  render();
+}
+
+
+/* =========================================================
+   Health Record 削除
+========================================================= */
+
+async function deleteHealthRecord(id) {
+
+  if (!confirm(
+    "この記録を削除しますか？"
+  )) return;
+
+  /*
+    子テーブル → health_records
+    の順番で削除
+  */
+
+  await sb
+    .from("poop_records")
+    .delete()
+    .eq("health_record_id", id);
+
+  await sb
+    .from("medication_logs")
+    .delete()
+    .eq("health_record_id", id);
+
+  await sb
+    .from("vomit_records")
+    .delete()
+    .eq("health_record_id", id);
+
+  await sb
+    .from("weight_records")
+    .delete()
+    .eq("health_record_id", id);
+
+  await sb
+    .from("period_records")
+    .delete()
+    .eq("health_record_id", id);
+
+  const { error } =
+    await sb
+      .from("health_records")
+      .delete()
+      .eq("id", id);
+
+  if (error) {
+    flash(error.message);
+    return;
+  }
+
+  closeModal();
+
+  flash("🗑️ 削除しました");
+
+  render();
+}
+
+
+/* =========================================================
+   今日の記録
+========================================================= */
+
+async function dayRecords(targetDate) {
+
+  const {
+    data,
+    error
+  } = await sb
+    .from("health_records")
+    .select(`
+      id,
+      record_type,
+      recorded_at,
+      comment,
+
+      poop_records(
+        poop_type,
+        comment
+      ),
+
+      medication_logs(
+        id,
+        medication_id,
+        dose,
+        comment,
+        medications(
+          name,
+          icon
+        )
+      ),
+
+      vomit_records(
+        severity,
+        comment
+      ),
+
+      weight_records(
+        weight_kg,
+        comment
+      ),
+
+      period_records(
+        period_type,
+        flow_level,
+        pain_level,
+        comment
+      )
+    `)
+    .eq(
+      "family_id",
+      profile.family_id
+    )
+    .gte(
+      "recorded_at",
+      targetDate + "T00:00:00"
+    )
+    .lt(
+      "recorded_at",
+      targetDate + "T23:59:59.999"
+    )
+    .order(
+      "recorded_at",
+      { ascending:false }
+    );
 
   if (error) {
 
@@ -2252,85 +2298,54 @@ async function dayRecords(
 
 
 /* =========================================================
-   📒 記録タイトル
+   Record Entry
 ========================================================= */
 
-function recordInfo(record) {
+function entry(record) {
 
   let name =
     record.record_type;
 
   let icon =
-    icons[
-      record.record_type
-    ] || "📝";
+    icons[record.record_type] ||
+    "📝";
 
-  let detail = "";
-
-
-  if (
-    record.record_type ===
-    "poop"
-  ) {
+  if (record.record_type === "poop") {
 
     const map = {
-      korokoro:
-        ["コロコロ", "🟤"],
-      banana:
-        ["バナナ", "🍌"],
-      bechabecha:
-        ["ベチャベチャ", "💩"],
-      liquid:
-        ["液体", "💧"]
+      korokoro:["コロコロ","🟤"],
+      banana:["バナナ","🍌"],
+      bechabecha:["ベチャベチャ","💩"],
+      liquid:["液体","💧"]
     };
 
     const value =
-      record
-        .poop_records?.[0]
-        ?.poop_type;
+      record.poop_records?.[0]?.poop_type;
 
-    [name, icon] =
+    [name,icon] =
       map[value] ||
-      ["ウンチ", "💩"];
+      ["ウンチ","💩"];
   }
 
+  if (record.record_type === "medicine") {
 
-  if (
-    record.record_type ===
-    "medicine"
-  ) {
-
-    const medication =
+    const medicine =
       record
         .medication_logs?.[0]
         ?.medications;
 
     name =
-      medication?.name ||
+      medicine?.name ||
       "薬";
 
     icon =
-      medication?.icon ||
+      medicine?.icon ||
       "💊";
-
-    const dose =
-      record
-        .medication_logs?.[0]
-        ?.dose;
-
-    if (dose) {
-      detail = `量：${esc(dose)}`;
-    }
   }
 
+  if (record.record_type === "vomit") {
 
-  if (
-    record.record_type ===
-    "vomit"
-  ) {
-
-    name =
-      "吐いた";
+    name = "吐いた";
 
     const severity =
       record
@@ -2338,17 +2353,12 @@ function recordInfo(record) {
         ?.severity;
 
     if (severity) {
-      detail =
-        "つらさ：" +
-        "★".repeat(severity);
+      name +=
+        ` ${"★".repeat(severity)}`;
     }
   }
 
-
-  if (
-    record.record_type ===
-    "weight"
-  ) {
+  if (record.record_type === "weight") {
 
     const value =
       record
@@ -2359,11 +2369,7 @@ function recordInfo(record) {
       `体重 ${value || "-"}kg`;
   }
 
-
-  if (
-    record.record_type ===
-    "period"
-  ) {
+  if (record.record_type === "period") {
 
     const p =
       record
@@ -2372,79 +2378,47 @@ function recordInfo(record) {
 
     if (p === "start") {
       name = "生理開始";
-    }
-    else if (p === "end") {
+    } else if (p === "end") {
       name = "生理終了";
-    }
-    else {
+    } else {
       name = "生理痛";
     }
 
     icon = "🌸";
   }
 
-
-  return {
-    name,
-    icon,
-    detail
-  };
-}
-
-
-/* =========================================================
-   📒 記録表示
-========================================================= */
-
-function entry(record) {
-
-  const info =
-    recordInfo(record);
-
   return `
-    <div class="entry funny-pop">
+    <div class="entry">
 
       <div class="ico">
-        ${info.icon}
+        ${icon}
       </div>
 
       <div class="meta">
 
-        <b>
-          ${esc(info.name)}
-        </b>
+        <b>${esc(name)}</b>
 
         <small>
           ${tm(record.recorded_at)}
+
           ${
             record.comment
-              ? "　💬 " +
-                esc(record.comment)
+              ? `　💬 ${esc(record.comment)}`
               : ""
           }
         </small>
 
-        ${
-          info.detail
-            ? `
-              <div class="record-detail">
-                ${info.detail}
-              </div>
-            `
-            : ""
-        }
-
-        <div class="entry-actions">
+        <div class="record-actions">
 
           <button
-            class="edit-btn"
+            class="edit-mini"
             onclick="editHealthRecord('${record.id}')"
           >
             ✏️ 編集
           </button>
 
           <button
-            class="delete-btn"
+            class="delete-mini"
             onclick="deleteHealthRecord('${record.id}')"
           >
             🗑️ 削除
@@ -2460,7 +2434,1518 @@ function entry(record) {
 
 
 /* =========================================================
-   🏠 ホーム
+   📌 Calendar Events
+========================================================= */
+
+async function eventsForMonth(
+  year,
+  month
+) {
+
+  const start =
+    new Date(
+      year,
+      month,
+      1
+    );
+
+  const end =
+    new Date(
+      year,
+      month + 1,
+      1
+    );
+
+  const {
+    data,
+    error
+  } = await sb
+    .from("calendar_events")
+    .select("*")
+    .eq(
+      "family_id",
+      profile.family_id
+    )
+    .gte(
+      "start_at",
+      start.toISOString()
+    )
+    .lt(
+      "start_at",
+      end.toISOString()
+    )
+    .order("start_at");
+
+  if (error) {
+
+    console.error(error);
+
+    return [];
+  }
+
+  return data || [];
+}
+
+
+async function eventsForDate(
+  targetDate
+) {
+
+  const start =
+    new Date(
+      `${targetDate}T00:00:00`
+    );
+
+  const end =
+    new Date(
+      start
+    );
+
+  end.setDate(
+    end.getDate() + 1
+  );
+
+  const {
+    data,
+    error
+  } = await sb
+    .from("calendar_events")
+    .select("*")
+    .eq(
+      "family_id",
+      profile.family_id
+    )
+    .gte(
+      "start_at",
+      start.toISOString()
+    )
+    .lt(
+      "start_at",
+      end.toISOString()
+    )
+    .order("start_at");
+
+  if (error) {
+
+    console.error(error);
+
+    return [];
+  }
+
+  return data || [];
+}
+
+
+/* =========================================================
+   📅 Calendar
+========================================================= */
+
+async function calendar() {
+
+  const year =
+    date.getFullYear();
+
+  const month =
+    date.getMonth();
+
+  const first =
+    new Date(
+      year,
+      month,
+      1
+    );
+
+  const start =
+    new Date(first);
+
+  start.setDate(
+    1 - first.getDay()
+  );
+
+  const last =
+    new Date(
+      year,
+      month + 1,
+      0
+    );
+
+  const [
+    healthData,
+    events
+  ] = await Promise.all([
+
+    sb
+      .from("health_records")
+      .select(
+        "id,recorded_at,record_type"
+      )
+      .eq(
+        "family_id",
+        profile.family_id
+      )
+      .gte(
+        "recorded_at",
+        start.toISOString()
+      )
+      .lt(
+        "recorded_at",
+        new Date(
+          year,
+          month + 1,
+          1
+        ).toISOString()
+      ),
+
+    eventsForMonth(
+      year,
+      month
+    )
+
+  ]);
+
+  const byDate = {};
+
+  (healthData.data || [])
+    .forEach(record => {
+
+      const key =
+        new Date(
+          record.recorded_at
+        ).toLocaleDateString(
+          "sv-SE"
+        );
+
+      if (!byDate[key]) {
+        byDate[key] = {
+          health:[],
+          events:[]
+        };
+      }
+
+      byDate[key].health.push(
+        record
+      );
+    });
+
+  events.forEach(event => {
+
+    const key =
+      new Date(
+        event.start_at
+      ).toLocaleDateString(
+        "sv-SE"
+      );
+
+    if (!byDate[key]) {
+      byDate[key] = {
+        health:[],
+        events:[]
+      };
+    }
+
+    byDate[key].events.push(
+      event
+    );
+  });
+
+
+  const cells = [];
+
+  for (let i = 0; i < 42; i++) {
+
+    const d =
+      new Date(start);
+
+    d.setDate(
+      start.getDate() + i
+    );
+
+    const key =
+      dk(d);
+
+    const item =
+      byDate[key] ||
+      {
+        health:[],
+        events:[]
+      };
+
+    const types =
+      item.health
+        .map(
+          x => x.record_type
+        )
+        .filter(
+          type =>
+            filter === "all" ||
+            type === filter
+        );
+
+    const eventCount =
+      item.events.length;
+
+    const selected =
+      key === dk(date);
+
+    cells.push(`
+      <button
+        class="
+          day
+          ${d.getMonth() !== month ? "other" : ""}
+          ${key === dk(new Date()) ? "today" : ""}
+          ${selected ? "selected" : ""}
+        "
+        onclick="calendarDay('${key}')"
+      >
+
+        <b>
+          ${d.getDate()}
+        </b>
+
+        <div>
+
+          ${
+            types.slice(0,3)
+              .map(
+                type =>
+                  `<span class="dot">
+                    ${icons[type] || "📝"}
+                  </span>`
+              )
+              .join("")
+          }
+
+          ${
+            eventCount
+              ? `<span class="dot">📌</span>`
+              : ""
+          }
+
+        </div>
+
+      </button>
+    `);
+  }
+
+
+  const filters = [
+    ["all","すべて"],
+    ["poop","💩"],
+    ["medicine","💊"],
+    ["vomit","🤢"],
+    ["weight","⚖️"],
+    ["period","🌸"]
+  ];
+
+
+  const selectedDate =
+    dk(date);
+
+  const [
+    selectedEvents,
+    selectedRecords
+  ] = await Promise.all([
+    eventsForDate(selectedDate),
+    dayRecords(selectedDate)
+  ]);
+
+
+  return `
+    <header class="hero">
+
+      <h1>📅 カレンダー</h1>
+
+      <p>
+        記録も予定もまとめて見えるよ
+      </p>
+
+    </header>
+
+    <main class="panel">
+
+      <div class="card datebar">
+
+        <button
+          onclick="
+            date = new Date(
+              year,
+              month - 1,
+              1
+            );
+            render()
+          "
+        >
+          ‹
+        </button>
+
+        <div class="date">
+          ${year}年${month + 1}月
+        </div>
+
+        <button
+          onclick="
+            date = new Date(
+              year,
+              month + 1,
+              1
+            );
+            render()
+          "
+        >
+          ›
+        </button>
+
+      </div>
+
+      <div class="tabs">
+
+        ${
+          filters.map(
+            ([value,label]) => `
+              <button
+                class="
+                  tab
+                  ${filter === value ? "on" : ""}
+                "
+                onclick="
+                  filter='${value}';
+                  render()
+                "
+              >
+                ${label}
+              </button>
+            `
+          ).join("")
+        }
+
+      </div>
+
+      <div class="card">
+
+        <div class="calendar">
+
+          ${
+            ["日","月","火","水","木","金","土"]
+              .map(
+                x =>
+                  `<div class="cal-head">
+                    ${x}
+                  </div>`
+              )
+              .join("")
+          }
+
+          ${cells.join("")}
+
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <div class="section-title">
+          📌 ${fmt(selectedDate)}の予定
+        </div>
+
+        ${
+          selectedEvents.length
+            ? selectedEvents
+                .map(eventItem)
+                .join("")
+            : `
+              <div class="empty">
+                この日の予定はないよ
+              </div>
+            `
+        }
+
+        <button
+          class="btn primary"
+          style="width:100%;margin-top:10px"
+          onclick="eventModal('${selectedDate}')"
+        >
+          ＋ この日に予定を追加
+        </button>
+
+      </div>
+
+      <div class="card">
+
+        <div class="section-title">
+          📒 ${fmt(selectedDate)}の記録
+        </div>
+
+        ${
+          selectedRecords.length
+            ? selectedRecords.map(entry).join("")
+            : `
+              <div class="empty">
+                記録はありません
+              </div>
+            `
+        }
+
+      </div>
+
+    </main>
+
+    ${nav("calendar")}
+  `;
+}
+
+
+/* =========================================================
+   Calendar day
+========================================================= */
+
+function calendarDay(key) {
+
+  date =
+    new Date(
+      `${key}T00:00:00`
+    );
+
+  eventModal(key);
+}
+
+
+/* =========================================================
+   Event Modal
+========================================================= */
+
+function eventModal(
+  targetDate = dk(date),
+  event = null
+) {
+
+  const edit =
+    !!event;
+
+  modal(
+    edit
+      ? "✏️ 予定を編集"
+      : "📌 予定を追加",
+    `
+      <div class="form-grid">
+
+        <input
+          id="eventTitle"
+          class="input"
+          placeholder="例：妊婦健診"
+          value="${esc(event?.title || "")}"
+        >
+
+        <input
+          id="eventDate"
+          class="input"
+          type="date"
+          value="${
+            event
+              ? dk(event.start_at)
+              : targetDate
+          }"
+        >
+
+        <input
+          id="eventTime"
+          class="input"
+          type="time"
+          value="${
+            event
+              ? tm(event.start_at)
+              : "10:00"
+          }"
+        >
+
+        <textarea
+          id="eventComment"
+          class="input textarea"
+          placeholder="メモ"
+        >${esc(event?.description || "")}</textarea>
+
+        <select
+          id="eventType"
+          class="input"
+        >
+
+          <option
+            value="other"
+            ${event?.event_type === "other" ? "selected" : ""}
+          >
+            📌 その他
+          </option>
+
+          <option
+            value="checkup"
+            ${event?.event_type === "checkup" ? "selected" : ""}
+          >
+            🏥 検診
+          </option>
+
+          <option
+            value="hospital"
+            ${event?.event_type === "hospital" ? "selected" : ""}
+          >
+            🏥 病院
+          </option>
+
+        </select>
+
+        <button
+          class="btn primary"
+          onclick="${
+            edit
+              ? `updateEvent('${event.id}')`
+              : "saveEvent()"
+          }"
+        >
+          💾 ${edit ? "保存" : "追加"}
+        </button>
+
+        ${
+          edit
+            ? `
+              <button
+                class="btn danger"
+                onclick="deleteEvent('${event.id}')"
+              >
+                🗑️ 削除
+              </button>
+            `
+            : ""
+        }
+
+      </div>
+    `
+  );
+}
+
+
+/* =========================================================
+   Save Event
+========================================================= */
+
+async function saveEvent() {
+
+  const title =
+    document.getElementById(
+      "eventTitle"
+    )?.value.trim();
+
+  const eventDate =
+    document.getElementById(
+      "eventDate"
+    )?.value;
+
+  const eventTime =
+    document.getElementById(
+      "eventTime"
+    )?.value ||
+    "10:00";
+
+  const description =
+    document.getElementById(
+      "eventComment"
+    )?.value || "";
+
+  const eventType =
+    document.getElementById(
+      "eventType"
+    )?.value ||
+    "other";
+
+  if (!title || !eventDate) {
+    flash("予定名と日付を入力してください");
+    return;
+  }
+
+  const start =
+    new Date(
+      `${eventDate}T${eventTime}:00`
+    );
+
+  const { error } =
+    await sb
+      .from("calendar_events")
+      .insert({
+        family_id:profile.family_id,
+        created_by:user.id,
+        title,
+        description,
+        start_at:start.toISOString(),
+        event_type:eventType,
+        is_all_day:false
+      });
+
+  if (error) {
+    flash(
+      "予定を保存できませんでした：" +
+      error.message
+    );
+    return;
+  }
+
+  closeModal();
+
+  flash("📌 カレンダーに追加しました！");
+
+  render();
+}
+
+
+/* =========================================================
+   Event Item
+========================================================= */
+
+function eventItem(event) {
+
+  return `
+    <div class="event-item">
+
+      <div class="event-date">
+        ${
+          fmt(event.start_at)
+        }
+       　
+        ${
+          event.is_all_day
+            ? "終日"
+            : tm(event.start_at)
+        }
+      </div>
+
+      <div class="event-title">
+        📌 ${esc(event.title)}
+      </div>
+
+      ${
+        event.description
+          ? `
+            <div style="margin-top:5px">
+              ${esc(event.description)}
+            </div>
+          `
+          : ""
+      }
+
+      <div class="record-actions">
+
+        <button
+          class="edit-mini"
+          onclick='editEventById("${event.id}")'
+        >
+          ✏️ 編集
+        </button>
+
+        <button
+          class="delete-mini"
+          onclick='deleteEvent("${event.id}")'
+        >
+          🗑️ 削除
+        </button>
+
+      </div>
+
+    </div>
+  `;
+}
+
+
+/* =========================================================
+   Event Edit
+========================================================= */
+
+async function editEventById(id) {
+
+  const {
+    data,
+    error
+  } = await sb
+    .from("calendar_events")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    flash(error.message);
+    return;
+  }
+
+  eventModal(
+    dk(data.start_at),
+    data
+  );
+}
+
+
+async function updateEvent(id) {
+
+  const title =
+    document.getElementById(
+      "eventTitle"
+    )?.value.trim();
+
+  const eventDate =
+    document.getElementById(
+      "eventDate"
+    )?.value;
+
+  const eventTime =
+    document.getElementById(
+      "eventTime"
+    )?.value ||
+    "10:00";
+
+  const description =
+    document.getElementById(
+      "eventComment"
+    )?.value || "";
+
+  const eventType =
+    document.getElementById(
+      "eventType"
+    )?.value ||
+    "other";
+
+  const start =
+    new Date(
+      `${eventDate}T${eventTime}:00`
+    );
+
+  const { error } =
+    await sb
+      .from("calendar_events")
+      .update({
+        title,
+        description,
+        start_at:start.toISOString(),
+        event_type:eventType,
+        updated_at:new Date().toISOString()
+      })
+      .eq("id", id);
+
+  if (error) {
+    flash(error.message);
+    return;
+  }
+
+  closeModal();
+
+  flash("✏️ 予定を更新しました");
+
+  render();
+}
+
+
+async function deleteEvent(id) {
+
+  if (!confirm(
+    "この予定を削除しますか？"
+  )) return;
+
+  const { error } =
+    await sb
+      .from("calendar_events")
+      .delete()
+      .eq("id", id);
+
+  if (error) {
+    flash(error.message);
+    return;
+  }
+
+  closeModal();
+
+  flash("🗑️ 予定を削除しました");
+
+  render();
+}
+
+
+/* =========================================================
+   🏥 検診
+========================================================= */
+
+async function checkups() {
+
+  const {
+    data,
+    error
+  } = await sb
+    .from("checkups")
+    .select("*")
+    .eq(
+      "family_id",
+      profile.family_id
+    )
+    .order(
+      "next_checkup_date",
+      { ascending:true }
+    );
+
+  if (error) {
+
+    console.error(error);
+
+    return [];
+  }
+
+  return data || [];
+}
+
+
+function checkupModal(
+  checkup = null
+) {
+
+  modal(
+    checkup
+      ? "✏️ 検診記録を編集"
+      : "🏥 検診を記録",
+    `
+      <div class="form-grid">
+
+        <label>検診日</label>
+
+        <input
+          id="checkupDate"
+          class="input"
+          type="date"
+          value="${
+            checkup?.next_checkup_date ||
+            dk(date)
+          }"
+        >
+
+        <input
+          id="checkupWeek"
+          class="input"
+          type="number"
+          placeholder="妊娠週数"
+          value="${
+            checkup?.gestational_week ?? ""
+          }"
+        >
+
+        <input
+          id="checkupDay"
+          class="input"
+          type="number"
+          placeholder="日"
+          value="${
+            checkup?.gestational_day ?? ""
+          }"
+        >
+
+        <input
+          id="checkupWeight"
+          class="input"
+          type="number"
+          step="0.1"
+          placeholder="体重 kg"
+          value="${
+            checkup?.weight_kg ?? ""
+          }"
+        >
+
+        <input
+          id="checkupSystolic"
+          class="input"
+          type="number"
+          placeholder="血圧 上"
+          value="${
+            checkup?.systolic ?? ""
+          }"
+        >
+
+        <input
+          id="checkupDiastolic"
+          class="input"
+          type="number"
+          placeholder="血圧 下"
+          value="${
+            checkup?.diastolic ?? ""
+          }"
+        >
+
+        <textarea
+          id="checkupNote"
+          class="input textarea"
+          placeholder="医師のメモ・検診結果"
+        >${esc(checkup?.doctor_note || "")}</textarea>
+
+        <label>
+          次回検診日
+        </label>
+
+        <input
+          id="nextCheckupDate"
+          class="input"
+          type="date"
+          value="${
+            checkup?.next_checkup_date || ""
+          }"
+        >
+
+        <button
+          class="btn primary"
+          onclick="${
+            checkup
+              ? `updateCheckup('${checkup.id}')`
+              : "saveCheckup()"
+          }"
+        >
+          💾 保存
+        </button>
+
+        ${
+          checkup
+            ? `
+              <button
+                class="btn danger"
+                onclick="deleteCheckup('${checkup.id}')"
+              >
+                🗑️ 削除
+              </button>
+            `
+            : ""
+        }
+
+      </div>
+    `
+  );
+}
+
+
+async function saveCheckup() {
+
+  const checkupDate =
+    document.getElementById(
+      "checkupDate"
+    )?.value;
+
+  const week =
+    Number(
+      document.getElementById(
+        "checkupWeek"
+      )?.value
+    ) || null;
+
+  const day =
+    Number(
+      document.getElementById(
+        "checkupDay"
+      )?.value
+    ) || null;
+
+  const weight =
+    parseFloat(
+      document.getElementById(
+        "checkupWeight"
+      )?.value
+    ) || null;
+
+  const systolic =
+    Number(
+      document.getElementById(
+        "checkupSystolic"
+      )?.value
+    ) || null;
+
+  const diastolic =
+    Number(
+      document.getElementById(
+        "checkupDiastolic"
+      )?.value
+    ) || null;
+
+  const doctorNote =
+    document.getElementById(
+      "checkupNote"
+    )?.value || "";
+
+  const nextDate =
+    document.getElementById(
+      "nextCheckupDate"
+    )?.value ||
+    null;
+
+  if (!checkupDate) {
+    flash("検診日を入力してください");
+    return;
+  }
+
+  const {
+    data:checkup,
+    error
+  } = await sb
+    .from("checkups")
+    .insert({
+      family_id:profile.family_id,
+      gestational_week:week,
+      gestational_day:day,
+      weight_kg:weight,
+      systolic,
+      diastolic,
+      doctor_note:doctorNote,
+      next_checkup_date:nextDate
+    })
+    .select()
+    .single();
+
+  if (error) {
+    flash(error.message);
+    return;
+  }
+
+  /*
+    検診記録自体もカレンダーに表示するため
+    calendar_eventsにも登録
+  */
+
+  const {
+    data:event,
+    error:eventError
+  } = await sb
+    .from("calendar_events")
+    .insert({
+      family_id:profile.family_id,
+      created_by:user.id,
+      title:"🏥 妊婦健診",
+      description:
+        doctorNote ||
+        "検診記録",
+      start_at:
+        new Date(
+          `${checkupDate}T10:00:00`
+        ).toISOString(),
+      event_type:"checkup",
+      is_all_day:false
+    })
+    .select()
+    .single();
+
+  if (!eventError && event) {
+
+    await sb
+      .from("checkups")
+      .update({
+        event_id:event.id
+      })
+      .eq("id", checkup.id);
+
+  }
+
+  closeModal();
+
+  flash("🏥 検診を記録しました");
+
+  render();
+}
+
+
+async function updateCheckup(id) {
+
+  const checkupDate =
+    document.getElementById(
+      "checkupDate"
+    )?.value;
+
+  const week =
+    Number(
+      document.getElementById(
+        "checkupWeek"
+      )?.value
+    ) || null;
+
+  const day =
+    Number(
+      document.getElementById(
+        "checkupDay"
+      )?.value
+    ) || null;
+
+  const weight =
+    parseFloat(
+      document.getElementById(
+        "checkupWeight"
+      )?.value
+    ) || null;
+
+  const systolic =
+    Number(
+      document.getElementById(
+        "checkupSystolic"
+      )?.value
+    ) || null;
+
+  const diastolic =
+    Number(
+      document.getElementById(
+        "checkupDiastolic"
+      )?.value
+    ) || null;
+
+  const doctorNote =
+    document.getElementById(
+      "checkupNote"
+    )?.value || "";
+
+  const nextDate =
+    document.getElementById(
+      "nextCheckupDate"
+    )?.value ||
+    null;
+
+  const {
+    data:old
+  } = await sb
+    .from("checkups")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  const { error } =
+    await sb
+      .from("checkups")
+      .update({
+        gestational_week:week,
+        gestational_day:day,
+        weight_kg:weight,
+        systolic,
+        diastolic,
+        doctor_note:doctorNote,
+        next_checkup_date:nextDate,
+        updated_at:new Date().toISOString()
+      })
+      .eq("id", id);
+
+  if (error) {
+    flash(error.message);
+    return;
+  }
+
+  /*
+    linked eventも更新
+  */
+
+  if (old?.event_id) {
+
+    await sb
+      .from("calendar_events")
+      .update({
+        title:"🏥 妊婦健診",
+        description:
+          doctorNote ||
+          "検診記録",
+        start_at:
+          new Date(
+            `${checkupDate}T10:00:00`
+          ).toISOString(),
+        updated_at:
+          new Date().toISOString()
+      })
+      .eq(
+        "id",
+        old.event_id
+      );
+
+  } else {
+
+    const {
+      data:event
+    } = await sb
+      .from("calendar_events")
+      .insert({
+        family_id:profile.family_id,
+        created_by:user.id,
+        title:"🏥 妊婦健診",
+        description:
+          doctorNote ||
+          "検診記録",
+        start_at:
+          new Date(
+            `${checkupDate}T10:00:00`
+          ).toISOString(),
+        event_type:"checkup",
+        is_all_day:false
+      })
+      .select()
+      .single();
+
+    if (event) {
+
+      await sb
+        .from("checkups")
+        .update({
+          event_id:event.id
+        })
+        .eq("id",id);
+
+    }
+  }
+
+  closeModal();
+
+  flash("✏️ 検診記録を更新しました");
+
+  render();
+}
+
+
+async function deleteCheckup(id) {
+
+  if (!confirm(
+    "この検診記録を削除しますか？"
+  )) return;
+
+  const {
+    data
+  } = await sb
+    .from("checkups")
+    .select("event_id")
+    .eq("id",id)
+    .single();
+
+  if (data?.event_id) {
+
+    await sb
+      .from("calendar_events")
+      .delete()
+      .eq(
+        "id",
+        data.event_id
+      );
+  }
+
+  const { error } =
+    await sb
+      .from("checkups")
+      .delete()
+      .eq("id",id);
+
+  if (error) {
+    flash(error.message);
+    return;
+  }
+
+  closeModal();
+
+  flash("🗑️ 検診記録を削除しました");
+
+  render();
+}
+
+
+/* =========================================================
+   ❓ 医師に聞きたいこと
+========================================================= */
+
+async function doctorQuestions() {
+
+  const {
+    data,
+    error
+  } = await sb
+    .from("doctor_questions")
+    .select("*")
+    .eq(
+      "family_id",
+      profile.family_id
+    )
+    .order(
+      "created_at",
+      { ascending:false }
+    );
+
+  if (error) {
+    console.error(error);
+    return [];
+  }
+
+  return data || [];
+}
+
+
+function questionModal(
+  question = null
+) {
+
+  modal(
+    question
+      ? "✏️ 質問を編集"
+      : "❓ 医師に聞きたいこと",
+    `
+      <div class="form-grid">
+
+        <textarea
+          id="doctorQuestion"
+          class="input textarea"
+          placeholder="例：この薬は飲み続けて大丈夫？"
+        >${esc(question?.question || "")}</textarea>
+
+        ${
+          question
+            ? `
+              <textarea
+                id="doctorAnswer"
+                class="input textarea"
+                placeholder="回答メモ"
+              >${esc(question?.answered_note || "")}</textarea>
+            `
+            : ""
+        }
+
+        <button
+          class="btn primary"
+          onclick="${
+            question
+              ? `updateQuestion('${question.id}')`
+              : "saveQuestion()"
+          }"
+        >
+          💾 保存
+        </button>
+
+        ${
+          question
+            ? `
+              <button
+                class="btn danger"
+                onclick="deleteQuestion('${question.id}')"
+              >
+                🗑️ 削除
+              </button>
+            `
+            : ""
+        }
+
+      </div>
+    `
+  );
+}
+
+
+async function saveQuestion() {
+
+  const question =
+    document.getElementById(
+      "doctorQuestion"
+    )?.value.trim();
+
+  if (!question) {
+    flash("質問を入力してください");
+    return;
+  }
+
+  const { error } =
+    await sb
+      .from("doctor_questions")
+      .insert({
+        family_id:profile.family_id,
+        created_by:user.id,
+        question,
+        is_done:false
+      });
+
+  if (error) {
+    flash(error.message);
+    return;
+  }
+
+  closeModal();
+
+  flash("❓ 質問を追加しました");
+
+  render();
+}
+
+
+async function updateQuestion(id) {
+
+  const question =
+    document.getElementById(
+      "doctorQuestion"
+    )?.value.trim();
+
+  const answeredNote =
+    document.getElementById(
+      "doctorAnswer"
+    )?.value || "";
+
+  const { error } =
+    await sb
+      .from("doctor_questions")
+      .update({
+        question,
+        answered_note:answeredNote,
+        updated_at:new Date().toISOString()
+      })
+      .eq("id",id);
+
+  if (error) {
+    flash(error.message);
+    return;
+  }
+
+  closeModal();
+
+  flash("✏️ 更新しました");
+
+  render();
+}
+
+
+async function toggleQuestion(
+  id,
+  done
+) {
+
+  const { error } =
+    await sb
+      .from("doctor_questions")
+      .update({
+        is_done:!done,
+        updated_at:new Date().toISOString()
+      })
+      .eq("id",id);
+
+  if (error) {
+    flash(error.message);
+    return;
+  }
+
+  render();
+}
+
+
+async function deleteQuestion(id) {
+
+  if (!confirm(
+    "この質問を削除しますか？"
+  )) return;
+
+  const { error } =
+    await sb
+      .from("doctor_questions")
+      .delete()
+      .eq("id",id);
+
+  if (error) {
+    flash(error.message);
+    return;
+  }
+
+  closeModal();
+
+  flash("🗑️ 質問を削除しました");
+
+  render();
+}
+
+
+/* =========================================================
+   🏠 Home
 ========================================================= */
 
 async function home() {
@@ -2475,53 +3960,84 @@ async function home() {
 
   const poopCount =
     records.filter(
-      x =>
-        x.record_type ===
-        "poop"
+      x => x.record_type === "poop"
     ).length;
 
   const medicineCount =
     records.filter(
-      x =>
-        x.record_type ===
-        "medicine"
+      x => x.record_type === "medicine"
     ).length;
 
   const vomitCount =
     records.filter(
-      x =>
-        x.record_type ===
-        "vomit"
+      x => x.record_type === "vomit"
     ).length;
 
   const weight =
     records.find(
-      x =>
-        x.record_type ===
-        "weight"
-    )
-      ?.weight_records?.[0]
+      x => x.record_type === "weight"
+    )?.weight_records?.[0]
       ?.weight_kg ||
     "-";
 
 
-  const gestation =
-    pregnancy
-      ? pregnancyStatus()
-      : "妊娠情報なし";
+  let gestation =
+    "妊娠情報なし";
+
+  let remaining =
+    "-";
+
+  if (pregnancy?.due_date) {
+
+    const due =
+      new Date(
+        pregnancy.due_date +
+        "T00:00:00"
+      );
+
+    const start =
+      new Date(due);
+
+    start.setDate(
+      start.getDate() - 280
+    );
+
+    const days =
+      Math.max(
+        0,
+        Math.floor(
+          (
+            Date.now() -
+            start.getTime()
+          ) /
+          86400000
+        )
+      );
+
+    gestation =
+      `${Math.floor(days / 7)}週${days % 7}日`;
+
+    remaining =
+      Math.ceil(
+        (
+          due.getTime() -
+          Date.now()
+        ) /
+        86400000
+      );
+  }
+
+
+  const todayEvents =
+    await eventsForDate(
+      dk(date)
+    );
 
 
   return `
-
     <header class="hero">
 
-      <div class="toilet">
-        🚽
-      </div>
-
-      <h1>
-        💩＆くすり記録
-      </h1>
+      <h1>💩＆くすり記録</h1>
 
       <p>
         タカちゃん × オタヤダ
@@ -2532,6 +4048,9 @@ async function home() {
         style="
           display:inline-block;
           margin-top:8px;
+          padding:10px 16px;
+          border-radius:18px;
+          font-weight:1000;
         "
       >
         🤰 ${gestation}
@@ -2539,14 +4058,11 @@ async function home() {
 
     </header>
 
-
     <main class="panel">
 
       <div class="card datebar">
 
-        <button
-          onclick="shiftDate(-1)"
-        >
+        <button onclick="shiftDate(-1)">
           ‹
         </button>
 
@@ -2554,9 +4070,7 @@ async function home() {
           ${fmt(dk(date))}
         </div>
 
-        <button
-          onclick="shiftDate(1)"
-        >
+        <button onclick="shiftDate(1)">
           ›
         </button>
 
@@ -2568,6 +4082,25 @@ async function home() {
         </button>
 
       </div>
+
+
+      ${
+        todayEvents.length
+          ? `
+            <div class="card">
+
+              <div class="section-title">
+                📌 今日の予定
+              </div>
+
+              ${todayEvents
+                .map(eventItem)
+                .join("")}
+
+            </div>
+          `
+          : ""
+      }
 
 
       <div class="stats">
@@ -2598,7 +4131,7 @@ async function home() {
       <div class="card">
 
         <div class="section-title">
-          💩 ウンチ出た〜！
+          💩 ウンチ出た〜！！
         </div>
 
         <div class="poop-grid">
@@ -2606,39 +4139,31 @@ async function home() {
           ${
             Object.entries(poop)
               .map(
-                ([key, [name, emoji, css]]) =>
-                  `
-                    <button
-                      class="poop ${css}"
-                      onclick="
-                        poopAdd(
-                          '${key}',
-                          this
-                        )
-                      "
-                    >
+                ([key,[name,emoji,css]]) => `
+                  <button
+                    class="poop ${css}"
+                    onclick="poopAdd('${key}',this)"
+                  >
 
-                      <span class="emoji">
-                        ${emoji}
-                      </span>
+                    <span class="emoji">
+                      ${emoji}
+                    </span>
 
-                      <span class="name">
-                        ${name}
-                      </span>
+                    <span class="name">
+                      ${name}
+                    </span>
 
-                      <div class="splash">
+                    <div class="splash">
+                      <i></i>
+                      <i></i>
+                      <i></i>
+                      <i></i>
+                      <i></i>
+                      <i></i>
+                    </div>
 
-                        <i></i>
-                        <i></i>
-                        <i></i>
-                        <i></i>
-                        <i></i>
-                        <i></i>
-
-                      </div>
-
-                    </button>
-                  `
+                  </button>
+                `
               )
               .join("")
           }
@@ -2659,56 +4184,34 @@ async function home() {
           ${
             medications
               .map(
-                medicine =>
-                  `
-                    <div
-                      style="
-                        position:relative;
-                        display:flex;
-                        flex-direction:column;
-                        gap:4px;
-                      "
-                    >
+                medicine => `
+                  <button
+                    class="med"
+                    onclick="
+                      medAdd(
+                        '${medicine.id}',
+                        '${esc(medicine.name)}',
+                        '${esc(medicine.icon || "💊")}'
+                      )
+                    "
+                  >
 
-                      <button
-                        class="med"
-                        onclick="
-                          medAddById(
-                            '${medicine.id}'
-                          )
-                        "
-                      >
+                    <span class="emoji">
+                      ${esc(
+                        medicine.icon ||
+                        "💊"
+                      )}
+                    </span>
 
-                        <span class="emoji">
-                          ${esc(
-                            medicine.icon ||
-                            "💊"
-                          )}
-                        </span>
+                    ${esc(
+                      medicine.name
+                    )}
 
-                        ${esc(
-                          medicine.name
-                        )}
-
-                      </button>
-
-                      <button
-                        class="mini-btn edit"
-                        onclick="
-                          editMed(
-                            '${medicine.id}'
-                          )
-                        "
-                      >
-                        ✏️ 編集
-                      </button>
-
-                    </div>
-                  `
+                  </button>
+                `
               )
               .join("")
           }
-
 
           <button
             class="addmed"
@@ -2747,9 +4250,9 @@ async function home() {
 
         <button
           class="btn soft"
-          onclick="notifyPartner()"
+          onclick="eventModal('${dk(date)}')"
         >
-          🔔 オタヤダに知らせる
+          📌 予定
         </button>
 
       </div>
@@ -2779,19 +4282,6 @@ async function home() {
 
       </div>
 
-
-      <div class="card">
-
-        <button
-          class="btn primary"
-          style="width:100%"
-          onclick="go('questions')"
-        >
-          📝 医師に聞きたいこと
-        </button>
-
-      </div>
-
     </main>
 
     ${nav("home")}
@@ -2800,55 +4290,13 @@ async function home() {
 
 
 /* =========================================================
-   妊娠ステータス
-========================================================= */
-
-function pregnancyStatus() {
-
-  if (!pregnancy) {
-    return "妊娠情報なし";
-  }
-
-  const due =
-    new Date(
-      pregnancy.due_date +
-      "T00:00:00"
-    );
-
-  const start =
-    new Date(due);
-
-  start.setDate(
-    start.getDate() -
-    280
-  );
-
-  const days =
-    Math.max(
-      0,
-      Math.floor(
-        (
-          Date.now() -
-          start.getTime()
-        ) / 86400000
-      )
-    );
-
-  return `
-    ${Math.floor(days / 7)}週${days % 7}日
-  `;
-}
-
-
-/* =========================================================
-   日付移動
+   Date
 ========================================================= */
 
 function shiftDate(amount) {
 
   date.setDate(
-    date.getDate() +
-    amount
+    date.getDate() + amount
   );
 
   render();
@@ -2856,2869 +4304,10 @@ function shiftDate(amount) {
 
 
 /* =========================================================
-   📝 Health Record 編集
+   🤰 Pregnancy
 ========================================================= */
 
-async function editHealthRecord(id) {
-
-  const {
-    data: record,
-    error
-  } =
-    await sb
-      .from("health_records")
-      .select(`
-        *,
-        poop_records(*),
-        medication_logs(
-          *,
-          medications(
-            *
-          )
-        ),
-        vomit_records(*),
-        weight_records(*),
-        period_records(*)
-      `)
-      .eq(
-        "id",
-        id
-      )
-      .maybeSingle();
-
-  if (error || !record) {
-
-    flash(
-      "記録が見つかりません"
-    );
-
-    return;
-  }
-
-
-  let body = `
-    <input
-      id="editRecordDate"
-      class="input"
-      type="datetime-local"
-      value="${dateTimeLocal(record.recorded_at)}"
-    >
-
-    <textarea
-      id="editRecordComment"
-      class="input textarea"
-      placeholder="コメント"
-    >${esc(record.comment || "")}</textarea>
-  `;
-
-
-  if (
-    record.record_type ===
-    "poop"
-  ) {
-
-    const current =
-      record
-        .poop_records?.[0]
-        ?.poop_type ||
-      "banana";
-
-    body += `
-
-      <select
-        id="editPoopType"
-        class="input"
-      >
-
-        ${
-          Object.entries(poop)
-            .map(
-              ([key, [name]]) =>
-                `
-                  <option
-                    value="${key}"
-                    ${current === key ? "selected" : ""}
-                  >
-                    ${name}
-                  </option>
-                `
-            )
-            .join("")
-        }
-
-      </select>
-
-    `;
-  }
-
-
-  if (
-    record.record_type ===
-    "medicine"
-  ) {
-
-    const currentMedication =
-      record
-        .medication_logs?.[0]
-        ?.medication_id ||
-      "";
-
-    const medications =
-      await meds();
-
-    body += `
-
-      <select
-        id="editMedicationId"
-        class="input"
-      >
-
-        ${
-          medications
-            .map(
-              m =>
-                `
-                  <option
-                    value="${m.id}"
-                    ${
-                      m.id ===
-                      currentMedication
-                        ? "selected"
-                        : ""
-                    }
-                  >
-                    ${esc(m.icon || "💊")}
-                    ${esc(m.name)}
-                  </option>
-                `
-            )
-            .join("")
-        }
-
-      </select>
-
-      <input
-        id="editDose"
-        class="input"
-        placeholder="量（任意）"
-        value="${esc(
-          record
-            .medication_logs?.[0]
-            ?.dose || ""
-        )}"
-      >
-
-    `;
-  }
-
-
-  if (
-    record.record_type ===
-    "vomit"
-  ) {
-
-    const severity =
-      record
-        .vomit_records?.[0]
-        ?.severity ||
-      3;
-
-    body += `
-
-      <select
-        id="editVomitSeverity"
-        class="input"
-      >
-
-        ${
-          [1,2,3,4,5]
-            .map(
-              n =>
-                `
-                  <option
-                    value="${n}"
-                    ${n === severity ? "selected" : ""}
-                  >
-                    ${"★".repeat(n)}
-                  </option>
-                `
-            )
-            .join("")
-        }
-
-      </select>
-
-    `;
-  }
-
-
-  if (
-    record.record_type ===
-    "weight"
-  ) {
-
-    body += `
-
-      <input
-        id="editWeight"
-        class="input"
-        type="number"
-        step="0.1"
-        value="${
-          record
-            .weight_records?.[0]
-            ?.weight_kg || ""
-        }"
-      >
-
-    `;
-  }
-
-
-  if (
-    record.record_type ===
-    "period"
-  ) {
-
-    const p =
-      record
-        .period_records?.[0];
-
-    body += `
-
-      <select
-        id="editPeriodType"
-        class="input"
-      >
-
-        <option
-          value="start"
-          ${p?.period_type === "start" ? "selected" : ""}
-        >
-          🌸 生理開始
-        </option>
-
-        <option
-          value="end"
-          ${p?.period_type === "end" ? "selected" : ""}
-        >
-          🌸 生理終了
-        </option>
-
-        <option
-          value="pain"
-          ${p?.period_type === "pain" ? "selected" : ""}
-        >
-          😖 生理痛
-        </option>
-
-      </select>
-
-      <select
-        id="editPeriodFlow"
-        class="input"
-      >
-
-        <option value="1">
-          少ない
-        </option>
-
-        <option
-          value="2"
-          ${
-            p?.flow_level === 2
-              ? "selected"
-              : ""
-          }
-        >
-          普通
-        </option>
-
-        <option
-          value="3"
-          ${
-            p?.flow_level === 3
-              ? "selected"
-              : ""
-          }
-        >
-          多い
-        </option>
-
-      </select>
-
-    `;
-  }
-
-
-  modal(
-    "✏️ 記録を編集",
-    `
-
-      <div class="form-grid">
-
-        ${body}
-
-        <button
-          class="btn primary"
-          onclick="
-            updateHealthRecord(
-              '${id}',
-              '${record.record_type}'
-            )
-          "
-        >
-          💾 保存する
-        </button>
-
-      </div>
-
-    `
-  );
-}
-
-
-/* =========================================================
-   Health Record 更新
-========================================================= */
-
-async function updateHealthRecord(
-  id,
-  type
-) {
-
-  const dt =
-    document
-      .getElementById(
-        "editRecordDate"
-      )
-      ?.value;
-
-  const comment =
-    document
-      .getElementById(
-        "editRecordComment"
-      )
-      ?.value ||
-    "";
-
-  if (!dt) {
-
-    flash(
-      "日時を入力してください"
-    );
-
-    return;
-  }
-
-
-  const {
-    error: updateError
-  } =
-    await sb
-      .from("health_records")
-      .update({
-        recorded_at:
-          new Date(dt)
-            .toISOString(),
-        comment
-      })
-      .eq(
-        "id",
-        id
-      );
-
-  if (updateError) {
-
-    flash(
-      updateError.message
-    );
-
-    return;
-  }
-
-
-  let childError = null;
-
-
-  if (type === "poop") {
-
-    const value =
-      document
-        .getElementById(
-          "editPoopType"
-        )
-        ?.value;
-
-    const {
-      error
-    } =
-      await sb
-        .from("poop_records")
-        .update({
-          poop_type:
-            value,
-          comment
-        })
-        .eq(
-          "health_record_id",
-          id
-        );
-
-    childError = error;
-  }
-
-
-  if (type === "medicine") {
-
-    const medicationId =
-      document
-        .getElementById(
-          "editMedicationId"
-        )
-        ?.value;
-
-    const dose =
-      document
-        .getElementById(
-          "editDose"
-        )
-        ?.value ||
-      "";
-
-    const {
-      error
-    } =
-      await sb
-        .from("medication_logs")
-        .update({
-          medication_id:
-            medicationId,
-          dose,
-          comment
-        })
-        .eq(
-          "health_record_id",
-          id
-        );
-
-    childError = error;
-  }
-
-
-  if (type === "vomit") {
-
-    const severity =
-      Number(
-        document
-          .getElementById(
-            "editVomitSeverity"
-          )
-          ?.value
-      );
-
-    const {
-      error
-    } =
-      await sb
-        .from("vomit_records")
-        .update({
-          severity,
-          comment
-        })
-        .eq(
-          "health_record_id",
-          id
-        );
-
-    childError = error;
-  }
-
-
-  if (type === "weight") {
-
-    const weight =
-      parseFloat(
-        document
-          .getElementById(
-            "editWeight"
-          )
-          ?.value
-      );
-
-    const {
-      error
-    } =
-      await sb
-        .from("weight_records")
-        .update({
-          weight_kg:
-            weight,
-          comment
-        })
-        .eq(
-          "health_record_id",
-          id
-        );
-
-    childError = error;
-  }
-
-
-  if (type === "period") {
-
-    const periodType =
-      document
-        .getElementById(
-          "editPeriodType"
-        )
-        ?.value;
-
-    const flow =
-      Number(
-        document
-          .getElementById(
-            "editPeriodFlow"
-          )
-          ?.value
-      );
-
-    const {
-      error
-    } =
-      await sb
-        .from("period_records")
-        .update({
-          period_type:
-            periodType,
-          flow_level:
-            flow,
-          comment
-        })
-        .eq(
-          "health_record_id",
-          id
-        );
-
-    childError = error;
-  }
-
-
-  if (childError) {
-
-    flash(
-      childError.message
-    );
-
-    return;
-  }
-
-
-  closeModal();
-
-  flash(
-    "✏️ 記録を更新しました"
-  );
-
-  render();
-}
-
-
-/* =========================================================
-   Health Record 削除
-========================================================= */
-
-async function deleteHealthRecord(id) {
-
-  askDelete(
-    "この記録を削除しますか？",
-    async () => {
-
-      try {
-
-        const tables = [
-          "poop_records",
-          "medication_logs",
-          "vomit_records",
-          "weight_records",
-          "period_records"
-        ];
-
-        for (
-          const table
-          of tables
-        ) {
-
-          const {
-            error
-          } =
-            await sb
-              .from(table)
-              .delete()
-              .eq(
-                "health_record_id",
-                id
-              );
-
-          if (error) {
-            throw error;
-          }
-        }
-
-
-        const {
-          error
-        } =
-          await sb
-            .from("health_records")
-            .delete()
-            .eq(
-              "id",
-              id
-            );
-
-        if (error) {
-          throw error;
-        }
-
-        flash(
-          "🗑️ 削除しました"
-        );
-
-        render();
-
-      } catch (e) {
-
-        console.error(e);
-
-        flash(
-          "削除できませんでした：" +
-          e.message
-        );
-      }
-    }
-  );
-}
-
-
-/* =========================================================
-   📅 カレンダー
-========================================================= */
-
-async function calendar() {
-
-  const year =
-    date.getFullYear();
-
-  const month =
-    date.getMonth();
-
-  const first =
-    new Date(
-      year,
-      month,
-      1
-    );
-
-  const start =
-    new Date(first);
-
-  start.setDate(
-    1 -
-    first.getDay()
-  );
-
-  const last =
-    new Date(
-      year,
-      month + 1,
-      0
-    );
-
-
-  const {
-    data: records
-  } =
-    await sb
-      .from("health_records")
-      .select(
-        "recorded_at,record_type"
-      )
-      .eq(
-        "family_id",
-        profile.family_id
-      )
-      .gte(
-        "recorded_at",
-        dk(start) +
-        "T00:00:00"
-      )
-      .lte(
-        "recorded_at",
-        dk(last) +
-        "T23:59:59"
-      );
-
-
-  const {
-    data: events
-  } =
-    await sb
-      .from("calendar_events")
-      .select(`
-        id,
-        title,
-        description,
-        start_at,
-        end_at,
-        event_type,
-        is_all_day
-      `)
-      .eq(
-        "family_id",
-        profile.family_id
-      )
-      .gte(
-        "start_at",
-        dk(start) +
-        "T00:00:00+09:00"
-      )
-      .lte(
-        "start_at",
-        dk(last) +
-        "T23:59:59+09:00"
-      )
-      .order(
-        "start_at"
-      );
-
-
-  const byDate = {};
-
-
-  (records || [])
-    .forEach(record => {
-
-      const key =
-        record.recorded_at
-          .substring(0,10);
-
-      if (!byDate[key]) {
-        byDate[key] = [];
-      }
-
-      if (
-        filter === "all" ||
-        filter ===
-          record.record_type
-      ) {
-
-        byDate[key]
-          .push({
-            icon:
-              icons[
-                record.record_type
-              ] ||
-              "📝",
-            type:
-              record.record_type
-          });
-      }
-    });
-
-
-  (events || [])
-    .forEach(event => {
-
-      const key =
-        new Date(
-          event.start_at
-        )
-          .toLocaleDateString(
-            "sv-SE",
-            {
-              timeZone:
-                "Asia/Tokyo"
-            }
-          );
-
-      if (!byDate[key]) {
-        byDate[key] = [];
-      }
-
-      byDate[key].push({
-        icon:
-          event.event_type ===
-          "checkup"
-            ? "🏥"
-            : "📌",
-        type:
-          event.event_type
-      });
-    });
-
-
-  const cells = [];
-
-
-  for (
-    let i = 0;
-    i < 42;
-    i++
-  ) {
-
-    const d =
-      new Date(start);
-
-    d.setDate(
-      start.getDate() +
-      i
-    );
-
-    const key =
-      dk(d);
-
-    const types =
-      byDate[key] ||
-      [];
-
-
-    cells.push(`
-      <button
-        class="
-          day
-          ${d.getMonth() !== month ? "other" : ""}
-          ${key === dk(new Date()) ? "today" : ""}
-        "
-        onclick="
-          calendarDayClick(
-            '${key}'
-          )
-        "
-      >
-
-        <b>
-          ${d.getDate()}
-        </b>
-
-        <div>
-
-          ${
-            types
-              .slice(0,6)
-              .map(
-                item =>
-                  `
-                    <span class="dot">
-                      ${item.icon}
-                    </span>
-                  `
-              )
-              .join("")
-          }
-
-        </div>
-
-      </button>
-    `);
-  }
-
-
-  const filters = [
-    ["all", "すべて"],
-    ["poop", "💩"],
-    ["medicine", "💊"],
-    ["vomit", "🤢"],
-    ["weight", "⚖️"],
-    ["period", "🌸"]
-  ];
-
-
-  const selectedEvents =
-    (events || [])
-      .filter(
-        e =>
-          new Date(
-            e.start_at
-          )
-            .toLocaleDateString(
-              "sv-SE",
-              {
-                timeZone:
-                  "Asia/Tokyo"
-              }
-            ) ===
-          dk(date)
-      );
-
-
-  return `
-
-    <header class="hero">
-
-      <div class="toilet">
-        📅
-      </div>
-
-      <h1>
-        カレンダー
-      </h1>
-
-      <p>
-        💩💊🤢⚖️🌸📌🏥
-      </p>
-
-    </header>
-
-
-    <main class="panel">
-
-      <div class="card datebar">
-
-        <button
-          onclick="
-            date = new Date(
-              year,
-              month - 1,
-              1
-            );
-            render()
-          "
-        >
-          ‹
-        </button>
-
-        <div class="date">
-          ${year}年${month + 1}月
-        </div>
-
-        <button
-          onclick="
-            date = new Date(
-              year,
-              month + 1,
-              1
-            );
-            render()
-          "
-        >
-          ›
-        </button>
-
-      </div>
-
-
-      <div class="tabs">
-
-        ${
-          filters
-            .map(
-              ([value,label]) =>
-                `
-                  <button
-                    class="
-                      tab
-                      ${
-                        filter === value
-                          ? "on"
-                          : ""
-                      }
-                    "
-                    onclick="
-                      filter='${value}';
-                      render()
-                    "
-                  >
-                    ${label}
-                  </button>
-                `
-            )
-            .join("")
-        }
-
-      </div>
-
-
-      <div class="card">
-
-        <div class="calendar">
-
-          ${
-            ["日","月","火","水","木","金","土"]
-              .map(
-                x =>
-                  `
-                    <div class="cal-head">
-                      ${x}
-                    </div>
-                  `
-              )
-              .join("")
-          }
-
-          ${cells.join("")}
-
-        </div>
-
-      </div>
-
-
-      <div class="card">
-
-        <div class="section-title">
-          📌 ${fmt(dk(date))}の予定
-        </div>
-
-        ${
-          selectedEvents.length
-            ? `
-              <div class="calendar-event-list">
-
-                ${
-                  selectedEvents
-                    .map(
-                      event =>
-                        `
-                          <div
-                            class="
-                              calendar-event
-                              ${
-                                event.event_type ===
-                                "checkup"
-                                  ? "checkup"
-                                  : ""
-                              }
-                            "
-                            onclick="
-                              editCalendarEvent(
-                                '${event.id}'
-                              )
-                            "
-                          >
-
-                            <div class="calendar-event-title">
-
-                              ${
-                                event.event_type ===
-                                "checkup"
-                                  ? "🏥 "
-                                  : "📌 "
-                              }
-
-                              ${esc(
-                                event.title
-                              )}
-
-                            </div>
-
-                            <div class="calendar-event-time">
-
-                              ${
-                                event.is_all_day
-                                  ? "終日"
-                                  : tm(
-                                      event.start_at
-                                    )
-                              }
-
-                              ${
-                                event.description
-                                  ? "　" +
-                                    esc(
-                                      event.description
-                                    )
-                                  : ""
-                              }
-
-                            </div>
-
-                          </div>
-                        `
-                    )
-                    .join("")
-                }
-
-              </div>
-            `
-            : `
-              <div class="empty-funny">
-                📭 この日の予定はまだないよ！
-              </div>
-            `
-        }
-
-
-        <button
-          class="btn primary"
-          style="width:100%;margin-top:10px"
-          onclick="
-            eventModal(
-              '${dk(date)}'
-            )
-          "
-        >
-          📌 この日に予定を追加
-        </button>
-
-      </div>
-
-
-      <div class="card">
-
-        <div class="section-title">
-          🏥 検診
-        </div>
-
-        <button
-          class="btn pink"
-          style="width:100%"
-          onclick="
-            checkupModal(
-              '${dk(date)}'
-            )
-          "
-        >
-          🏥 この日に検診を追加
-        </button>
-
-      </div>
-
-
-      <div class="card">
-
-        <button
-          class="btn soft"
-          style="width:100%"
-          onclick="go('questions')"
-        >
-          📝 医師に聞きたいこと
-        </button>
-
-      </div>
-
-    </main>
-
-    ${nav("calendar")}
-  `;
-}
-
-
-/* =========================================================
-   カレンダーの日付タップ
-========================================================= */
-
-function calendarDayClick(
-  key
-) {
-
-  date =
-    new Date(
-      key +
-      "T00:00:00"
-    );
-
-  modal(
-    `${fmt(key)} 📅`,
-    `
-
-      <div class="form-grid">
-
-        <button
-          class="btn primary"
-          onclick="
-            closeModal();
-            eventModal('${key}')
-          "
-        >
-          📌 予定を追加
-        </button>
-
-        <button
-          class="btn pink"
-          onclick="
-            closeModal();
-            checkupModal('${key}')
-          "
-        >
-          🏥 検診を追加
-        </button>
-
-        <button
-          class="btn soft"
-          onclick="
-            closeModal();
-            go('home')
-          "
-        >
-          📒 この日の記録を見る
-        </button>
-
-      </div>
-
-    `
-  );
-}
-
-
-/* =========================================================
-   📌 予定追加
-========================================================= */
-
-function eventModal(
-  selectedDate = dk(date)
-) {
-
-  modal(
-    "📌 予定を追加",
-    `
-
-      <div class="form-grid">
-
-        <input
-          id="eventTitle"
-          class="input"
-          placeholder="例：病院・買い物・予定"
-        >
-
-        <input
-          id="eventDate"
-          class="input"
-          type="date"
-          value="${selectedDate}"
-        >
-
-        <input
-          id="eventTime"
-          class="input"
-          type="time"
-          value="10:00"
-        >
-
-        <select
-          id="eventType"
-          class="input"
-        >
-
-          <option value="other">
-            📌 その他
-          </option>
-
-          <option value="appointment">
-            🗓️ 予定
-          </option>
-
-          <option value="checkup">
-            🏥 検診
-          </option>
-
-        </select>
-
-        <textarea
-          id="eventComment"
-          class="input textarea"
-          placeholder="メモ"
-        ></textarea>
-
-        <button
-          class="btn primary"
-          onclick="saveEvent()"
-        >
-          📌 追加
-        </button>
-
-      </div>
-
-    `
-  );
-}
-
-
-/* =========================================================
-   予定保存
-========================================================= */
-
-async function saveEvent() {
-
-  const title =
-    document
-      .getElementById(
-        "eventTitle"
-      )
-      ?.value
-      .trim();
-
-  const eventDate =
-    document
-      .getElementById(
-        "eventDate"
-      )
-      ?.value;
-
-  const eventTime =
-    document
-      .getElementById(
-        "eventTime"
-      )
-      ?.value;
-
-  const eventType =
-    document
-      .getElementById(
-        "eventType"
-      )
-      ?.value ||
-    "other";
-
-  const comment =
-    document
-      .getElementById(
-        "eventComment"
-      )
-      ?.value ||
-    "";
-
-  if (!title || !eventDate) {
-
-    flash(
-      "予定名と日付を入力してください"
-    );
-
-    return;
-  }
-
-
-  const {
-    error
-  } =
-    await sb
-      .from("calendar_events")
-      .insert({
-        family_id:
-          profile.family_id,
-        created_by:
-          user.id,
-        title,
-        description:
-          comment,
-        start_at:
-          `${eventDate}T${eventTime || "10:00"}:00+09:00`,
-        event_type:
-          eventType,
-        is_all_day:
-          false
-      });
-
-  if (error) {
-
-    flash(
-      "予定を保存できませんでした：" +
-      error.message
-    );
-
-    return;
-  }
-
-  closeModal();
-
-  date =
-    new Date(
-      eventDate +
-      "T00:00:00"
-    );
-
-  flash(
-    "📌 カレンダーに予定を追加しました！"
-  );
-
-  render();
-}
-
-
-/* =========================================================
-   📌 予定編集
-========================================================= */
-
-async function editCalendarEvent(id) {
-
-  const {
-    data,
-    error
-  } =
-    await sb
-      .from("calendar_events")
-      .select("*")
-      .eq(
-        "id",
-        id
-      )
-      .maybeSingle();
-
-  if (error || !data) {
-
-    flash(
-      "予定が見つかりません"
-    );
-
-    return;
-  }
-
-
-  modal(
-    "✏️ 予定を編集",
-    `
-
-      <div class="form-grid">
-
-        <input
-          id="editEventTitle"
-          class="input"
-          value="${esc(data.title)}"
-        >
-
-        <input
-          id="editEventDate"
-          class="input"
-          type="date"
-          value="${new Date(data.start_at).toLocaleDateString("sv-SE",{timeZone:"Asia/Tokyo"})}"
-        >
-
-        <input
-          id="editEventTime"
-          class="input"
-          type="time"
-          value="${new Date(data.start_at).toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit",hour12:false})}"
-        >
-
-        <select
-          id="editEventType"
-          class="input"
-        >
-
-          <option
-            value="other"
-            ${
-              data.event_type === "other"
-                ? "selected"
-                : ""
-            }
-          >
-            📌 その他
-          </option>
-
-          <option
-            value="appointment"
-            ${
-              data.event_type === "appointment"
-                ? "selected"
-                : ""
-            }
-          >
-            🗓️ 予定
-          </option>
-
-          <option
-            value="checkup"
-            ${
-              data.event_type === "checkup"
-                ? "selected"
-                : ""
-            }
-          >
-            🏥 検診
-          </option>
-
-        </select>
-
-        <textarea
-          id="editEventComment"
-          class="input textarea"
-        >${esc(data.description || "")}</textarea>
-
-        <button
-          class="btn primary"
-          onclick="
-            updateCalendarEvent(
-              '${id}'
-            )
-          "
-        >
-          💾 保存
-        </button>
-
-        <button
-          class="btn danger"
-          onclick="
-            deleteCalendarEvent(
-              '${id}'
-            )
-          "
-        >
-          🗑️ この予定を削除
-        </button>
-
-      </div>
-
-    `
-  );
-}
-
-
-async function updateCalendarEvent(id) {
-
-  const title =
-    document
-      .getElementById(
-        "editEventTitle"
-      )
-      ?.value
-      .trim();
-
-  const d =
-    document
-      .getElementById(
-        "editEventDate"
-      )
-      ?.value;
-
-  const t =
-    document
-      .getElementById(
-        "editEventTime"
-      )
-      ?.value ||
-    "10:00";
-
-  const type =
-    document
-      .getElementById(
-        "editEventType"
-      )
-      ?.value ||
-    "other";
-
-  const description =
-    document
-      .getElementById(
-        "editEventComment"
-      )
-      ?.value ||
-    "";
-
-  if (!title || !d) {
-
-    flash(
-      "タイトルと日付を入力してください"
-    );
-
-    return;
-  }
-
-
-  const {
-    error
-  } =
-    await sb
-      .from("calendar_events")
-      .update({
-        title,
-        description,
-        start_at:
-          `${d}T${t}:00+09:00`,
-        event_type:
-          type
-      })
-      .eq(
-        "id",
-        id
-      );
-
-  if (error) {
-
-    flash(
-      error.message
-    );
-
-    return;
-  }
-
-  closeModal();
-
-  date =
-    new Date(
-      d +
-      "T00:00:00"
-    );
-
-  flash(
-    "✏️ 予定を更新しました"
-  );
-
-  render();
-}
-
-
-async function deleteCalendarEvent(id) {
-
-  askDelete(
-    "この予定を削除しますか？",
-    async () => {
-
-      const {
-        error
-      } =
-        await sb
-          .from("calendar_events")
-          .delete()
-          .eq(
-            "id",
-            id
-          );
-
-      if (error) {
-
-        flash(
-          error.message
-        );
-
-        return;
-      }
-
-      closeModal();
-
-      flash(
-        "🗑️ 予定を削除しました"
-      );
-
-      render();
-    }
-  );
-}
-
-
-/* =========================================================
-   🏥 検診
-========================================================= */
-
-function checkupModal(
-  selectedDate = dk(date)
-) {
-
-  modal(
-    "🏥 検診記録",
-    `
-
-      <div class="form-grid">
-
-        <input
-          id="checkupDate"
-          class="input"
-          type="date"
-          value="${selectedDate}"
-        >
-
-        <input
-          id="checkupTime"
-          class="input"
-          type="time"
-          value="10:00"
-        >
-
-        <input
-          id="checkupTitle"
-          class="input"
-          value="妊婦健診"
-          placeholder="例：妊婦健診"
-        >
-
-        <input
-          id="checkupWeek"
-          class="input"
-          type="number"
-          placeholder="妊娠週数（例：20）"
-        >
-
-        <input
-          id="checkupDay"
-          class="input"
-          type="number"
-          placeholder="妊娠日数（例：3）"
-        >
-
-        <input
-          id="checkupWeight"
-          class="input"
-          type="number"
-          step="0.1"
-          placeholder="体重 kg"
-        >
-
-        <input
-          id="checkupSys"
-          class="input"
-          type="number"
-          placeholder="血圧 上"
-        >
-
-        <input
-          id="checkupDia"
-          class="input"
-          type="number"
-          placeholder="血圧 下"
-        >
-
-        <textarea
-          id="checkupNote"
-          class="input textarea"
-          placeholder="先生のメモ・検診内容"
-        ></textarea>
-
-        <input
-          id="nextCheckup"
-          class="input"
-          type="date"
-          placeholder="次回健診"
-        >
-
-        <button
-          class="btn pink"
-          onclick="saveCheckup()"
-        >
-          🏥 検診を保存
-        </button>
-
-      </div>
-
-    `
-  );
-}
-
-
-async function saveCheckup() {
-
-  const d =
-    document
-      .getElementById(
-        "checkupDate"
-      )
-      ?.value;
-
-  const time =
-    document
-      .getElementById(
-        "checkupTime"
-      )
-      ?.value ||
-    "10:00";
-
-  const title =
-    document
-      .getElementById(
-        "checkupTitle"
-      )
-      ?.value
-      .trim() ||
-    "妊婦健診";
-
-  const week =
-    Number(
-      document
-        .getElementById(
-          "checkupWeek"
-        )
-        ?.value
-    ) || null;
-
-  const day =
-    Number(
-      document
-        .getElementById(
-          "checkupDay"
-        )
-        ?.value
-    ) || null;
-
-  const weight =
-    parseFloat(
-      document
-        .getElementById(
-          "checkupWeight"
-        )
-        ?.value
-    ) || null;
-
-  const sys =
-    Number(
-      document
-        .getElementById(
-          "checkupSys"
-        )
-        ?.value
-    ) || null;
-
-  const dia =
-    Number(
-      document
-        .getElementById(
-          "checkupDia"
-        )
-        ?.value
-    ) || null;
-
-  const note =
-    document
-      .getElementById(
-        "checkupNote"
-      )
-      ?.value ||
-    "";
-
-  const next =
-    document
-      .getElementById(
-        "nextCheckup"
-      )
-      ?.value ||
-    null;
-
-
-  if (!d) {
-
-    flash(
-      "検診日を入力してください"
-    );
-
-    return;
-  }
-
-
-  try {
-
-    const {
-      data: event,
-      error: eventError
-    } =
-      await sb
-        .from("calendar_events")
-        .insert({
-          family_id:
-            profile.family_id,
-          created_by:
-            user.id,
-          title,
-          description:
-            note,
-          start_at:
-            `${d}T${time}:00+09:00`,
-          event_type:
-            "checkup",
-          is_all_day:
-            false
-        })
-        .select()
-        .single();
-
-    if (eventError) {
-      throw eventError;
-    }
-
-
-    const {
-      error: checkupError
-    } =
-      await sb
-        .from("checkups")
-        .insert({
-          family_id:
-            profile.family_id,
-          event_id:
-            event.id,
-          pregnancy_id:
-            pregnancy?.id ||
-            null,
-          gestational_week:
-            week,
-          gestational_day:
-            day,
-          weight_kg:
-            weight,
-          systolic:
-            sys,
-          diastolic:
-            dia,
-          doctor_note:
-            note,
-          next_checkup_date:
-            next
-        });
-
-    if (checkupError) {
-      throw checkupError;
-    }
-
-
-    closeModal();
-
-    date =
-      new Date(
-        d +
-        "T00:00:00"
-      );
-
-    flash(
-      "🏥 検診をカレンダーに追加しました！"
-    );
-
-    render();
-
-  } catch (e) {
-
-    console.error(e);
-
-    flash(
-      "検診を保存できませんでした：" +
-      e.message
-    );
-  }
-}
-
-
-/* =========================================================
-   🏥 検診一覧
-========================================================= */
-
-async function getCheckups() {
-
-  const {
-    data,
-    error
-  } =
-    await sb
-      .from("checkups")
-      .select(`
-        *,
-        calendar_events(
-          id,
-          title,
-          description,
-          start_at
-        )
-      `)
-      .eq(
-        "family_id",
-        profile.family_id
-      )
-      .order(
-        "created_at",
-        {
-          ascending:false
-        }
-      );
-
-  if (error) {
-
-    console.error(error);
-
-    return [];
-  }
-
-  return data || [];
-}
-
-
-/* =========================================================
-   🏥 検診編集
-========================================================= */
-
-async function editCheckup(id) {
-
-  const {
-    data,
-    error
-  } =
-    await sb
-      .from("checkups")
-      .select(`
-        *,
-        calendar_events(*)
-      `)
-      .eq(
-        "id",
-        id
-      )
-      .maybeSingle();
-
-  if (error || !data) {
-
-    flash(
-      "検診記録が見つかりません"
-    );
-
-    return;
-  }
-
-
-  const event =
-    data.calendar_events;
-
-
-  const localDate =
-    new Date(
-      event.start_at
-    );
-
-
-  modal(
-    "✏️ 検診を編集",
-    `
-
-      <div class="form-grid">
-
-        <input
-          id="editCheckupDate"
-          class="input"
-          type="date"
-          value="${localDate.toLocaleDateString("sv-SE",{timeZone:"Asia/Tokyo"})}"
-        >
-
-        <input
-          id="editCheckupTime"
-          class="input"
-          type="time"
-          value="${localDate.toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit",hour12:false})}"
-        >
-
-        <input
-          id="editCheckupTitle"
-          class="input"
-          value="${esc(event.title || "妊婦健診")}"
-        >
-
-        <input
-          id="editCheckupWeek"
-          class="input"
-          type="number"
-          value="${data.gestational_week ?? ""}"
-          placeholder="妊娠週数"
-        >
-
-        <input
-          id="editCheckupDay"
-          class="input"
-          type="number"
-          value="${data.gestational_day ?? ""}"
-          placeholder="妊娠日数"
-        >
-
-        <input
-          id="editCheckupWeight"
-          class="input"
-          type="number"
-          step="0.1"
-          value="${data.weight_kg ?? ""}"
-          placeholder="体重"
-        >
-
-        <input
-          id="editCheckupSys"
-          class="input"
-          type="number"
-          value="${data.systolic ?? ""}"
-          placeholder="血圧 上"
-        >
-
-        <input
-          id="editCheckupDia"
-          class="input"
-          type="number"
-          value="${data.diastolic ?? ""}"
-          placeholder="血圧 下"
-        >
-
-        <textarea
-          id="editCheckupNote"
-          class="input textarea"
-        >${esc(data.doctor_note || "")}</textarea>
-
-        <input
-          id="editNextCheckup"
-          class="input"
-          type="date"
-          value="${data.next_checkup_date || ""}"
-        >
-
-        <button
-          class="btn primary"
-          onclick="
-            updateCheckup(
-              '${id}',
-              '${event.id}'
-            )
-          "
-        >
-          💾 保存
-        </button>
-
-        <button
-          class="btn danger"
-          onclick="
-            deleteCheckup(
-              '${id}',
-              '${event.id}'
-            )
-          "
-        >
-          🗑️ 検診を削除
-        </button>
-
-      </div>
-
-    `
-  );
-}
-
-
-/* =========================================================
-   検診更新
-========================================================= */
-
-async function updateCheckup(
-  id,
-  eventId
-) {
-
-  const d =
-    document
-      .getElementById(
-        "editCheckupDate"
-      )
-      ?.value;
-
-  const time =
-    document
-      .getElementById(
-        "editCheckupTime"
-      )
-      ?.value ||
-    "10:00";
-
-  const title =
-    document
-      .getElementById(
-        "editCheckupTitle"
-      )
-      ?.value
-      .trim() ||
-    "妊婦健診";
-
-  const week =
-    Number(
-      document
-        .getElementById(
-          "editCheckupWeek"
-        )
-        ?.value
-    ) || null;
-
-  const day =
-    Number(
-      document
-        .getElementById(
-          "editCheckupDay"
-        )
-        ?.value
-    ) || null;
-
-  const weight =
-    parseFloat(
-      document
-        .getElementById(
-          "editCheckupWeight"
-        )
-        ?.value
-    ) || null;
-
-  const sys =
-    Number(
-      document
-        .getElementById(
-          "editCheckupSys"
-        )
-        ?.value
-    ) || null;
-
-  const dia =
-    Number(
-      document
-        .getElementById(
-          "editCheckupDia"
-        )
-        ?.value
-    ) || null;
-
-  const note =
-    document
-      .getElementById(
-        "editCheckupNote"
-      )
-      ?.value ||
-    "";
-
-  const next =
-    document
-      .getElementById(
-        "editNextCheckup"
-      )
-      ?.value ||
-    null;
-
-
-  if (!d) {
-
-    flash(
-      "検診日を入力してください"
-    );
-
-    return;
-  }
-
-
-  const {
-    error: eventError
-  } =
-    await sb
-      .from("calendar_events")
-      .update({
-        title,
-        description:
-          note,
-        start_at:
-          `${d}T${time}:00+09:00`,
-        event_type:
-          "checkup"
-      })
-      .eq(
-        "id",
-        eventId
-      );
-
-  if (eventError) {
-
-    flash(
-      eventError.message
-    );
-
-    return;
-  }
-
-
-  const {
-    error
-  } =
-    await sb
-      .from("checkups")
-      .update({
-        gestational_week:
-          week,
-        gestational_day:
-          day,
-        weight_kg:
-          weight,
-        systolic:
-          sys,
-        diastolic:
-          dia,
-        doctor_note:
-          note,
-        next_checkup_date:
-          next
-      })
-      .eq(
-        "id",
-        id
-      );
-
-  if (error) {
-
-    flash(
-      error.message
-    );
-
-    return;
-  }
-
-
-  closeModal();
-
-  date =
-    new Date(
-      d +
-      "T00:00:00"
-    );
-
-  flash(
-    "🏥 検診を更新しました"
-  );
-
-  render();
-}
-
-
-/* =========================================================
-   🏥 検診削除
-========================================================= */
-
-async function deleteCheckup(
-  id,
-  eventId
-) {
-
-  askDelete(
-    "この検診記録とカレンダー予定を削除しますか？",
-    async () => {
-
-      try {
-
-        const {
-          error: cError
-        } =
-          await sb
-            .from("checkups")
-            .delete()
-            .eq(
-              "id",
-              id
-            );
-
-        if (cError) {
-          throw cError;
-        }
-
-
-        const {
-          error: eError
-        } =
-          await sb
-            .from("calendar_events")
-            .delete()
-            .eq(
-              "id",
-              eventId
-            );
-
-        if (eError) {
-          throw eError;
-        }
-
-        closeModal();
-
-        flash(
-          "🗑️ 検診を削除しました"
-        );
-
-        render();
-
-      } catch (e) {
-
-        flash(
-          "削除できませんでした：" +
-          e.message
-        );
-      }
-    }
-  );
-}
-
-
-/* =========================================================
-   📝 医師に聞きたいこと
-========================================================= */
-
-async function questions() {
-
-  const {
-    data,
-    error
-  } =
-    await sb
-      .from("doctor_questions")
-      .select("*")
-      .eq(
-        "family_id",
-        profile.family_id
-      )
-      .order(
-        "is_done",
-        {
-          ascending:true
-        }
-      )
-      .order(
-        "created_at",
-        {
-          ascending:false
-        }
-      );
-
-  if (error) {
-
-    flash(
-      error.message
-    );
-
-    return `
-      ${nav("questions")}
-    `;
-  }
-
-
-  return `
-
-    <header class="hero">
-
-      <div class="toilet">
-        🩺
-      </div>
-
-      <h1>
-        📝 医師に聞きたいこと
-      </h1>
-
-      <p>
-        健診前にメモしておこう！
-      </p>
-
-    </header>
-
-
-    <main class="panel">
-
-      <div class="card">
-
-        <button
-          class="btn primary"
-          style="width:100%"
-          onclick="addQuestion()"
-        >
-          ＋ 質問を追加
-        </button>
-
-      </div>
-
-
-      <div class="card">
-
-        ${
-          data?.length
-            ? data
-                .map(
-                  q =>
-                    `
-                      <div
-                        class="
-                          doctor-question
-                          ${
-                            q.is_done
-                              ? "done"
-                              : ""
-                          }
-                        "
-                      >
-
-                        <div
-                          class="question-text"
-                          style="
-                            font-weight:1000;
-                            font-size:16px;
-                          "
-                        >
-                          ❓ ${esc(q.question)}
-                        </div>
-
-                        ${
-                          q.answered_note
-                            ? `
-                              <div
-                                style="
-                                  margin-top:8px;
-                                  font-size:13px;
-                                "
-                              >
-                                💬
-                                ${esc(
-                                  q.answered_note
-                                )}
-                              </div>
-                            `
-                            : ""
-                        }
-
-                        <div class="mini-actions">
-
-                          <button
-                            class="mini-btn done"
-                            onclick="
-                              toggleQuestion(
-                                '${q.id}',
-                                ${!q.is_done}
-                              )
-                            "
-                          >
-                            ${
-                              q.is_done
-                                ? "↩️ 未完了"
-                                : "✅ 完了"
-                            }
-                          </button>
-
-                          <button
-                            class="mini-btn edit"
-                            onclick="
-                              editQuestion(
-                                '${q.id}'
-                              )
-                            "
-                          >
-                            ✏️ 編集
-                          </button>
-
-                          <button
-                            class="mini-btn delete"
-                            onclick="
-                              deleteQuestion(
-                                '${q.id}'
-                              )
-                            "
-                          >
-                            🗑️ 削除
-                          </button>
-
-                        </div>
-
-                      </div>
-                    `
-                )
-                .join("")
-            : `
-              <div class="empty-funny">
-                🩺 先生に聞くこと、まだないよ！
-              </div>
-            `
-        }
-
-      </div>
-
-    </main>
-
-    ${nav("questions")}
-  `;
-}
-
-
-function addQuestion() {
-
-  modal(
-    "📝 医師に聞きたいこと",
-    `
-
-      <div class="form-grid">
-
-        <textarea
-          id="questionText"
-          class="input textarea"
-          placeholder="例：この薬は飲み続けて大丈夫？"
-        ></textarea>
-
-        <textarea
-          id="questionAnswer"
-          class="input textarea"
-          placeholder="回答メモ（後から入力）"
-        ></textarea>
-
-        <button
-          class="btn primary"
-          onclick="saveQuestion()"
-        >
-          📝 追加する
-        </button>
-
-      </div>
-
-    `
-  );
-}
-
-
-async function saveQuestion() {
-
-  const question =
-    document
-      .getElementById(
-        "questionText"
-      )
-      ?.value
-      .trim();
-
-  const answer =
-    document
-      .getElementById(
-        "questionAnswer"
-      )
-      ?.value ||
-    "";
-
-  if (!question) {
-
-    flash(
-      "質問を入力してください"
-    );
-
-    return;
-  }
-
-
-  const {
-    error
-  } =
-    await sb
-      .from("doctor_questions")
-      .insert({
-        family_id:
-          profile.family_id,
-        created_by:
-          user.id,
-        question,
-        answered_note:
-          answer,
-        is_done:
-          false
-      });
-
-  if (error) {
-
-    flash(
-      error.message
-    );
-
-    return;
-  }
-
-  closeModal();
-
-  flash(
-    "📝 質問を追加しました"
-  );
-
-  render();
-}
-
-
-async function editQuestion(id) {
-
-  const {
-    data,
-    error
-  } =
-    await sb
-      .from("doctor_questions")
-      .select("*")
-      .eq(
-        "id",
-        id
-      )
-      .maybeSingle();
-
-  if (error || !data) {
-
-    flash(
-      "質問が見つかりません"
-    );
-
-    return;
-  }
-
-
-  modal(
-    "✏️ 質問を編集",
-    `
-
-      <div class="form-grid">
-
-        <textarea
-          id="editQuestionText"
-          class="input textarea"
-        >${esc(data.question)}</textarea>
-
-        <textarea
-          id="editQuestionAnswer"
-          class="input textarea"
-        >${esc(data.answered_note || "")}</textarea>
-
-        <button
-          class="btn primary"
-          onclick="
-            updateQuestion(
-              '${id}'
-            )
-          "
-        >
-          💾 保存
-        </button>
-
-        <button
-          class="btn danger"
-          onclick="
-            deleteQuestion(
-              '${id}'
-            )
-          "
-        >
-          🗑️ 削除
-        </button>
-
-      </div>
-
-    `
-  );
-}
-
-
-async function updateQuestion(id) {
-
-  const question =
-    document
-      .getElementById(
-        "editQuestionText"
-      )
-      ?.value
-      .trim();
-
-  const answer =
-    document
-      .getElementById(
-        "editQuestionAnswer"
-      )
-      ?.value ||
-    "";
-
-  if (!question) {
-
-    flash(
-      "質問を入力してください"
-    );
-
-    return;
-  }
-
-
-  const {
-    error
-  } =
-    await sb
-      .from("doctor_questions")
-      .update({
-        question,
-        answered_note:
-          answer
-      })
-      .eq(
-        "id",
-        id
-      );
-
-  if (error) {
-
-    flash(
-      error.message
-    );
-
-    return;
-  }
-
-  closeModal();
-
-  flash(
-    "✏️ 質問を更新しました"
-  );
-
-  render();
-}
-
-
-async function toggleQuestion(
-  id,
-  value
-) {
-
-  const {
-    error
-  } =
-    await sb
-      .from("doctor_questions")
-      .update({
-        is_done:
-          value
-      })
-      .eq(
-        "id",
-        id
-      );
-
-  if (error) {
-
-    flash(
-      error.message
-    );
-
-    return;
-  }
-
-  render();
-}
-
-
-async function deleteQuestion(id) {
-
-  askDelete(
-    "この質問を削除しますか？",
-    async () => {
-
-      const {
-        error
-      } =
-        await sb
-          .from("doctor_questions")
-          .delete()
-          .eq(
-            "id",
-            id
-          );
-
-      if (error) {
-
-        flash(
-          error.message
-        );
-
-        return;
-      }
-
-      closeModal();
-
-      flash(
-        "🗑️ 質問を削除しました"
-      );
-
-      render();
-    }
-  );
-}
-
-
-/* =========================================================
-   🤰 妊娠ページ
-========================================================= */
-
-async function pregnancyPage() {
+function pregnancyPage() {
 
   let gestation =
     "未設定";
@@ -5726,8 +4315,7 @@ async function pregnancyPage() {
   let remaining =
     "-";
 
-
-  if (pregnancy) {
+  if (pregnancy?.due_date) {
 
     const due =
       new Date(
@@ -5739,8 +4327,7 @@ async function pregnancyPage() {
       new Date(due);
 
     start.setDate(
-      start.getDate() -
-      280
+      start.getDate() - 280
     );
 
     const days =
@@ -5769,79 +4356,10 @@ async function pregnancyPage() {
   }
 
 
-  const weeks =
-    pregnancy
-      ? Number(
-          pregnancyWeek()
-        )
-      : 0;
-
-
-  let checklist = [];
-
-
-  if (weeks < 8) {
-
-    checklist = [
-      "次回の産婦人科の予定を確認",
-      "葉酸サプリを忘れず記録",
-      "体調が悪いときは無理をしない",
-      "先生に聞きたいことをメモ"
-    ];
-
-  } else if (weeks < 12) {
-
-    checklist = [
-      "次回健診を確認",
-      "母子手帳・必要書類を確認",
-      "体調・吐き気を記録",
-      "薬を飲んだら記録"
-    ];
-
-  } else if (weeks < 20) {
-
-    checklist = [
-      "健診予定を確認",
-      "体重を定期的に記録",
-      "体調の変化をメモ",
-      "先生に聞きたいことを整理"
-    ];
-
-  } else if (weeks < 28) {
-
-    checklist = [
-      "健診予定を確認",
-      "体重の推移を確認",
-      "出産準備について相談",
-      "必要な買い物をリスト化"
-    ];
-
-  } else {
-
-    checklist = [
-      "健診予定を確認",
-      "出産準備を確認",
-      "入院準備を確認",
-      "病院への連絡方法を確認"
-    ];
-  }
-
-
-  const checkups =
-    await getCheckups();
-
-
   return `
-
     <header class="hero">
 
-      <div class="toilet">
-        🤰
-      </div>
-
-      <h1>
-        妊娠
-      </h1>
+      <h1>🤰 妊娠</h1>
 
       <p>
         タカちゃんの妊娠ダッシュボード
@@ -5849,48 +4367,35 @@ async function pregnancyPage() {
 
     </header>
 
-
     <main class="panel">
 
       <div class="card">
 
-        <div class="notice">
+        <div
+          class="notice"
+          style="
+            text-align:center;
+            padding:18px;
+            border-radius:22px;
+          "
+        >
 
-          🤰
-          <b>
-            ${gestation}
-          </b>
+          <div style="
+            font-size:32px;
+            font-weight:1000;
+          ">
+            🤰 ${gestation}
+          </div>
 
-          ／
-
-          予定日まで
-          <b>
+          <div style="
+            margin-top:7px;
+            font-weight:900;
+          ">
+            出産予定日まで
             ${remaining}日
-          </b>
+          </div>
 
         </div>
-
-      </div>
-
-
-      <div class="card">
-
-        <div class="section-title">
-          📌 今週やること
-        </div>
-
-        <ul>
-
-          ${
-            checklist
-              .map(
-                item =>
-                  `<li>${esc(item)}</li>`
-              )
-              .join("")
-          }
-
-        </ul>
 
       </div>
 
@@ -5901,17 +4406,13 @@ async function pregnancyPage() {
           🗓️ 出産予定日
         </div>
 
-        <p
-          style="
-            font-size:24px;
-            font-weight:1000
-          "
-        >
+        <p style="
+          font-size:25px;
+          font-weight:1000;
+        ">
           ${
-            pregnancy
-              ? fmt(
-                  pregnancy.due_date
-                )
+            pregnancy?.due_date
+              ? fmt(pregnancy.due_date)
               : "未設定"
           }
         </p>
@@ -5925,128 +4426,38 @@ async function pregnancyPage() {
           🏥 検診記録
         </div>
 
-        ${
-          checkups.length
-            ? checkups
-                .map(
-                  c => {
-
-                    const e =
-                      c.calendar_events;
-
-                    return `
-                      <div
-                        class="calendar-event checkup"
-                        onclick="
-                          editCheckup(
-                            '${c.id}'
-                          )
-                        "
-                      >
-
-                        <div
-                          class="calendar-event-title"
-                        >
-                          🏥
-                          ${esc(
-                            e?.title ||
-                            "妊婦健診"
-                          )}
-                        </div>
-
-                        <div
-                          class="calendar-event-time"
-                        >
-                          ${
-                            e
-                              ? fmt(
-                                  new Date(
-                                    e.start_at
-                                  )
-                                    .toLocaleDateString(
-                                      "sv-SE",
-                                      {
-                                        timeZone:
-                                          "Asia/Tokyo"
-                                      }
-                                    )
-                                )
-                              : "-"
-                          }
-
-                          ${
-                            c.gestational_week != null
-                              ? `　${c.gestational_week}週${c.gestational_day || 0}日`
-                              : ""
-                          }
-                        </div>
-
-                        ${
-                          c.doctor_note
-                            ? `
-                              <div
-                                class="record-detail"
-                              >
-                                ${esc(
-                                  c.doctor_note
-                                )}
-                              </div>
-                            `
-                            : ""
-                        }
-
-                      </div>
-                    `;
-                  }
-                )
-                .join("")
-            : `
-              <div class="empty-funny">
-                🏥 まだ検診記録がないよ！
-              </div>
-            `
-        }
-
-        <button
-          class="btn pink"
-          style="
-            width:100%;
-            margin-top:10px
-          "
-          onclick="
-            checkupModal(
-              '${dk(date)}'
-            )
-          "
-        >
-          🏥 検診を追加
-        </button>
-
-      </div>
-
-
-      <div class="card">
-
         <button
           class="btn primary"
           style="width:100%"
-          onclick="go('questions')"
+          onclick="checkupModal()"
         >
-          📝 医師に聞きたいこと
+          ＋ 検診を記録
         </button>
+
+        <div id="checkupList">
+          読み込み中…
+        </div>
 
       </div>
 
 
       <div class="card">
 
+        <div class="section-title">
+          ❓ 医師に聞きたいこと
+        </div>
+
         <button
-          class="btn soft"
+          class="btn pink"
           style="width:100%"
-          onclick="go('calendar')"
+          onclick="questionModal()"
         >
-          📅 カレンダーを見る
+          ＋ 質問を追加
         </button>
+
+        <div id="questionList">
+          読み込み中…
+        </div>
 
       </div>
 
@@ -6057,90 +4468,271 @@ async function pregnancyPage() {
 }
 
 
-function pregnancyWeek() {
+/* =========================================================
+   Pregnancy後データ描画
+========================================================= */
 
-  if (!pregnancy) {
-    return 0;
-  }
+async function loadPregnancyExtras() {
 
-  const due =
-    new Date(
-      pregnancy.due_date +
-      "T00:00:00"
+  if (view !== "pregnancy") return;
+
+  const [
+    cs,
+    qs
+  ] = await Promise.all([
+    checkups(),
+    doctorQuestions()
+  ]);
+
+  const checkupBox =
+    document.getElementById(
+      "checkupList"
     );
 
-  const start =
-    new Date(due);
+  const questionBox =
+    document.getElementById(
+      "questionList"
+    );
 
-  start.setDate(
-    start.getDate() -
-    280
-  );
+  if (checkupBox) {
 
-  return Math.floor(
-    Math.max(
-      0,
-      (
-        Date.now() -
-        start.getTime()
-      ) /
-      86400000
-    ) / 7
-  );
+    checkupBox.innerHTML =
+      cs.length
+        ? cs.map(
+            c => `
+              <div class="checkup-item">
+
+                <div class="event-date">
+                  🏥 ${fmt(
+                    c.next_checkup_date
+                  )}
+                </div>
+
+                <div style="
+                  font-weight:1000;
+                  margin-top:4px;
+                ">
+                  ${
+                    c.gestational_week != null
+                      ? `${c.gestational_week}週${
+                          c.gestational_day || 0
+                        }日`
+                      : "検診"
+                  }
+                </div>
+
+                ${
+                  c.weight_kg != null
+                    ? `<div>⚖️ ${c.weight_kg}kg</div>`
+                    : ""
+                }
+
+                ${
+                  c.systolic != null
+                    ? `<div>🩺 ${c.systolic}/${c.diastolic || "-"}</div>`
+                    : ""
+                }
+
+                ${
+                  c.doctor_note
+                    ? `
+                      <div style="margin-top:6px">
+                        📝 ${esc(c.doctor_note)}
+                      </div>
+                    `
+                    : ""
+                }
+
+                <div class="record-actions">
+
+                  <button
+                    class="edit-mini"
+                    onclick='openCheckupEdit("${c.id}")'
+                  >
+                    ✏️ 編集
+                  </button>
+
+                  <button
+                    class="delete-mini"
+                    onclick='deleteCheckup("${c.id}")'
+                  >
+                    🗑️ 削除
+                  </button>
+
+                </div>
+
+              </div>
+            `
+          ).join("")
+        : `
+          <div class="empty">
+            まだ検診記録がないよ
+          </div>
+        `;
+  }
+
+  if (questionBox) {
+
+    questionBox.innerHTML =
+      qs.length
+        ? qs.map(
+            q => `
+              <div
+                class="
+                  question-item
+                  ${q.is_done ? "question-done" : ""}
+                "
+              >
+
+                <div style="
+                  font-weight:1000;
+                ">
+                  ❓ ${esc(q.question)}
+                </div>
+
+                ${
+                  q.answered_note
+                    ? `
+                      <div style="
+                        margin-top:6px;
+                      ">
+                        📝 ${esc(
+                          q.answered_note
+                        )}
+                      </div>
+                    `
+                    : ""
+                }
+
+                <div
+                  style="
+                    display:flex;
+                    gap:5px;
+                    margin-top:8px;
+                    flex-wrap:wrap;
+                  "
+                >
+
+                  <button
+                    class="mini-btn mini-done"
+                    onclick="
+                      toggleQuestion(
+                        '${q.id}',
+                        ${!!q.is_done}
+                      )
+                    "
+                  >
+                    ${
+                      q.is_done
+                        ? "↩️ 未完了"
+                        : "✅ 完了"
+                    }
+                  </button>
+
+                  <button
+                    class="mini-btn mini-edit"
+                    onclick='openQuestionEdit("${q.id}")'
+                  >
+                    ✏️ 編集
+                  </button>
+
+                  <button
+                    class="mini-btn mini-delete"
+                    onclick='deleteQuestion("${q.id}")'
+                  >
+                    🗑️ 削除
+                  </button>
+
+                </div>
+
+              </div>
+            `
+          ).join("")
+        : `
+          <div class="empty">
+            先生に聞きたいことを追加してね
+          </div>
+        `;
+  }
+}
+
+
+async function openCheckupEdit(id) {
+
+  const {
+    data,
+    error
+  } = await sb
+    .from("checkups")
+    .select("*")
+    .eq("id",id)
+    .single();
+
+  if (error) {
+    flash(error.message);
+    return;
+  }
+
+  checkupModal(data);
+}
+
+
+async function openQuestionEdit(id) {
+
+  const {
+    data,
+    error
+  } = await sb
+    .from("doctor_questions")
+    .select("*")
+    .eq("id",id)
+    .single();
+
+  if (error) {
+    flash(error.message);
+    return;
+  }
+
+  questionModal(data);
 }
 
 
 /* =========================================================
-   👩‍❤️‍👨 夫婦・設定
+   👩‍❤️‍👨 Family
 ========================================================= */
 
 async function settings() {
 
   let members = [];
 
-
   if (family) {
 
     const {
       data
-    } =
-      await sb
-        .from("profiles")
-        .select(
-          "display_name,role"
-        )
-        .eq(
-          "family_id",
-          family.id
-        );
+    } = await sb
+      .from("profiles")
+      .select(
+        "id,display_name,role"
+      )
+      .eq(
+        "family_id",
+        family.id
+      );
 
     members =
       data || [];
   }
 
-
-  const medications =
-    await meds();
-
-
   return `
-
     <header class="hero">
 
-      <div class="toilet">
-        ❤️
-      </div>
-
-      <h1>
-        夫婦
-      </h1>
+      <h1>❤️ 夫婦</h1>
 
       <p>
-        2人で一緒に使う
+        2人で一緒に使おう
       </p>
 
     </header>
-
 
     <main class="panel">
 
@@ -6152,36 +4744,39 @@ async function settings() {
 
         ${
           members.length
-            ? members
-                .map(
-                  member =>
-                    `
-                      <div
-                        class="member"
-                        style="
-                          padding:12px;
-                          background:#faf7ff;
-                          border-radius:15px;
-                          margin:6px 0;
-                        "
-                      >
+            ? members.map(
+                member => `
+                  <div
+                    class="member"
+                    style="
+                      padding:12px;
+                      background:#faf7ff;
+                      border-radius:15px;
+                      margin:6px 0;
+                    "
+                  >
 
-                        ${
-                          member.role === "wife"
-                            ? "👩"
-                            : "👨"
-                        }
+                    ${
+                      member.role === "wife"
+                        ? "👩"
+                        : "👨"
+                    }
 
-                        <b>
-                          ${esc(
-                            member.display_name
-                          )}
-                        </b>
+                    <b>
+                      ${esc(
+                        member.display_name
+                      )}
+                    </b>
 
-                      </div>
-                    `
-                )
-                .join("")
+                    ${
+                      member.id === user.id
+                        ? "（あなた）"
+                        : ""
+                    }
+
+                  </div>
+                `
+              ).join("")
             : `
               <div class="empty">
                 メンバー情報なし
@@ -6200,6 +4795,7 @@ async function settings() {
 
         <button
           class="btn primary"
+          style="width:100%"
           onclick="showInvite()"
         >
           🔗 招待コードを表示
@@ -6214,63 +4810,13 @@ async function settings() {
           💊 薬・サプリ管理
         </div>
 
-        ${
-          medications.length
-            ? medications
-                .map(
-                  m =>
-                    `
-                      <div
-                        style="
-                          display:flex;
-                          align-items:center;
-                          justify-content:space-between;
-                          gap:8px;
-                          padding:10px;
-                          margin:6px 0;
-                          background:#faf7ff;
-                          border-radius:15px;
-                        "
-                      >
-
-                        <div>
-                          ${esc(
-                            m.icon ||
-                            "💊"
-                          )}
-                          <b>
-                            ${esc(m.name)}
-                          </b>
-                        </div>
-
-                        <button
-                          class="mini-btn edit"
-                          onclick="
-                            editMed(
-                              '${m.id}'
-                            )
-                          "
-                        >
-                          ✏️
-                        </button>
-
-                      </div>
-                    `
-                )
-                .join("")
-            : `
-              <div class="empty">
-                薬・サプリはまだないよ
-              </div>
-            `
-        }
+        <div id="medManage">
+          読み込み中…
+        </div>
 
         <button
-          class="btn soft"
-          style="
-            width:100%;
-            margin-top:8px
-          "
+          class="btn primary"
+          style="width:100%;margin-top:10px"
           onclick="addMed()"
         >
           ＋ 薬・サプリを追加
@@ -6281,11 +4827,16 @@ async function settings() {
 
       <div class="card">
 
+        <div class="section-title">
+          📒 全履歴
+        </div>
+
         <button
-          class="btn pink"
-          onclick="notifyPartner()"
+          class="btn soft"
+          style="width:100%"
+          onclick="allRecords()"
         >
-          🔔 通知をテスト
+          📒 履歴を見る
         </button>
 
       </div>
@@ -6297,9 +4848,7 @@ async function settings() {
           class="btn danger"
           onclick="
             sb.auth.signOut()
-              .then(
-                () => location.reload()
-              )
+              .then(() => location.reload())
           "
         >
           ログアウト
@@ -6315,19 +4864,82 @@ async function settings() {
 
 
 /* =========================================================
-   🔔 通知
+   Medication管理
 ========================================================= */
 
-async function notifyPartner() {
+async function loadMedicationManagement() {
 
-  flash(
-    "🔔 通知機能は次の工程で接続します！"
-  );
+  const box =
+    document.getElementById(
+      "medManage"
+    );
+
+  if (!box) return;
+
+  const data =
+    await meds();
+
+  box.innerHTML =
+    data.length
+      ? data.map(
+          m => `
+            <div
+              class="event-item"
+            >
+
+              <div style="
+                font-size:18px;
+                font-weight:1000;
+              ">
+                ${esc(
+                  m.icon || "💊"
+                )}
+                ${esc(m.name)}
+              </div>
+
+              ${
+                m.description
+                  ? `
+                    <div class="hint">
+                      ${esc(
+                        m.description
+                      )}
+                    </div>
+                  `
+                  : ""
+              }
+
+              <div class="record-actions">
+
+                <button
+                  class="edit-mini"
+                  onclick='editMedication("${m.id}")'
+                >
+                  ✏️ 編集
+                </button>
+
+                <button
+                  class="delete-mini"
+                  onclick='deleteMedication("${m.id}")'
+                >
+                  🗑️ 削除
+                </button>
+
+              </div>
+
+            </div>
+          `
+        ).join("")
+      : `
+        <div class="empty">
+          薬・サプリはまだ登録されていません
+        </div>
+      `;
 }
 
 
 /* =========================================================
-   📒 全履歴
+   📒 All Records
 ========================================================= */
 
 async function allRecords() {
@@ -6335,65 +4947,59 @@ async function allRecords() {
   const {
     data,
     error
-  } =
-    await sb
-      .from("health_records")
-      .select(`
-        id,
-        record_type,
-        recorded_at,
-        comment,
+  } = await sb
+    .from("health_records")
+    .select(`
+      id,
+      record_type,
+      recorded_at,
+      comment,
 
-        poop_records(
-          poop_type
-        ),
+      poop_records(
+        poop_type
+      ),
 
-        medication_logs(
-          medications(
-            name,
-            icon
-          )
-        ),
-
-        vomit_records(
-          severity
-        ),
-
-        weight_records(
-          weight_kg
-        ),
-
-        period_records(
-          period_type
+      medication_logs(
+        medication_id,
+        medications(
+          name,
+          icon
         )
-      `)
-      .eq(
-        "family_id",
-        profile.family_id
+      ),
+
+      vomit_records(
+        severity
+      ),
+
+      weight_records(
+        weight_kg
+      ),
+
+      period_records(
+        period_type
       )
-      .order(
-        "recorded_at",
-        {
-          ascending:false
-        }
-      )
-      .limit(200);
+    `)
+    .eq(
+      "family_id",
+      profile.family_id
+    )
+    .order(
+      "recorded_at",
+      {
+        ascending:false
+      }
+    )
+    .limit(300);
 
   if (error) {
-
-    flash(
-      error.message
-    );
-
+    flash(error.message);
     return;
   }
-
 
   modal(
     "📒 最近の記録",
     `
-
-      <div class="list">
+      <div class="family-history-list">
 
         ${
           data?.length
@@ -6408,82 +5014,51 @@ async function allRecords() {
         }
 
       </div>
-
     `
   );
 }
 
 
 /* =========================================================
-   ナビ
+   Navigation
+   ★ 履歴は夫婦へ移動
 ========================================================= */
 
 function nav(active) {
 
   return `
-
     <nav class="nav">
 
       <button
-        class="
-          ${active === "home" ? "active" : ""}
-        "
+        class="${active === "home" ? "active" : ""}"
         onclick="go('home')"
       >
         <span>🏠</span>
         ホーム
       </button>
 
-
       <button
-        class="
-          ${active === "calendar" ? "active" : ""}
-        "
+        class="${active === "calendar" ? "active" : ""}"
         onclick="go('calendar')"
       >
         <span>📅</span>
         カレンダー
       </button>
 
-
       <button
-        class="
-          ${active === "pregnancy" ? "active" : ""}
-        "
+        class="${active === "pregnancy" ? "active" : ""}"
         onclick="go('pregnancy')"
       >
         <span>🤰</span>
         妊娠
       </button>
 
-
       <button
-        class="
-          ${active === "questions" ? "active" : ""}
-        "
-        onclick="go('questions')"
-      >
-        <span>📝</span>
-        質問
-      </button>
-
-
-      <button
-        class="
-          ${active === "settings" ? "active" : ""}
-        "
+        class="${active === "settings" ? "active" : ""}"
         onclick="go('settings')"
       >
         <span>❤️</span>
         夫婦
-      </button>
-
-
-      <button
-        onclick="allRecords()"
-      >
-        <span>📒</span>
-        履歴
       </button>
 
     </nav>
@@ -6492,7 +5067,7 @@ function nav(active) {
 
 
 /* =========================================================
-   画面切替
+   View
 ========================================================= */
 
 async function go(nextView) {
@@ -6507,19 +5082,14 @@ async function go(nextView) {
 async function render() {
 
   if (!user) {
-
     auth();
-
     return;
   }
 
   if (!profile) {
-
     onboarding();
-
     return;
   }
-
 
   if (view === "calendar") {
 
@@ -6529,33 +5099,25 @@ async function render() {
     return;
   }
 
-
   if (view === "pregnancy") {
 
     app.innerHTML =
-      await pregnancyPage();
+      pregnancyPage();
+
+    await loadPregnancyExtras();
 
     return;
   }
-
 
   if (view === "settings") {
 
     app.innerHTML =
       await settings();
 
-    return;
-  }
-
-
-  if (view === "questions") {
-
-    app.innerHTML =
-      await questions();
+    await loadMedicationManagement();
 
     return;
   }
-
 
   app.innerHTML =
     await home();
