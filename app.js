@@ -1,5 +1,5 @@
 /* =========================================================
-   💩＆くすり記録アプリ
+   💩＆💊記録アプリ
    完全版 app.js
 ========================================================= */
 
@@ -230,7 +230,7 @@ async function testPushNotification() {
   try {
     const reg = await registerPushServiceWorker();
     if (!reg) throw new Error("Service Workerが利用できません");
-    await reg.showNotification("💩＆くすり記録", {
+    await reg.showNotification("💩＆💊記録", {
       body: document.getElementById("notifyMessage")?.value || "テスト通知です！",
       icon: "./icon-192.png",
       badge: "./icon-192.png",
@@ -248,6 +248,7 @@ async function notificationStatus() {
   const subscription = await getPushSubscription();
   return !!subscription && Notification.permission === "granted";
 }
+
 
 
 /* =========================================================
@@ -454,11 +455,19 @@ function injectExtraCSS() {
       padding:0;
       width:100%;
       max-width:100%;
+      min-width:0;
+      overflow-x:hidden;
+    }
+
+    #app {
+      width:100%;
+      max-width:100%;
+      min-width:0;
       overflow-x:hidden;
     }
 
     body {
-      padding-bottom:90px;
+      padding-bottom:92px;
     }
 
     button,
@@ -488,27 +497,49 @@ function injectExtraCSS() {
       text-shadow:none !important;
     }
 
+    .notice,
+    .notice * {
+      color:#5b416b !important;
+      text-shadow:none !important;
+    }
+
+    /* 下部4タブをiPhone幅でも必ず均等配置 */
     .nav {
       position:fixed !important;
+      inset:auto 0 0 0 !important;
       left:0 !important;
       right:0 !important;
       bottom:0 !important;
-      width:100% !important;
-      max-width:100% !important;
-      z-index:9990;
+      width:100vw !important;
+      max-width:none !important;
+      min-width:0 !important;
+      margin:0 !important;
+      transform:none !important;
+      z-index:9990 !important;
       display:grid !important;
-      grid-template-columns:repeat(4,1fr) !important;
-      padding:8px 8px calc(8px + env(safe-area-inset-bottom)) !important;
+      grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+      align-items:stretch !important;
+      justify-items:stretch !important;
+      padding:7px 8px calc(7px + env(safe-area-inset-bottom)) !important;
       gap:5px !important;
       box-sizing:border-box !important;
+      overflow:visible !important;
     }
 
     .nav button {
+      display:flex !important;
+      flex-direction:column !important;
+      align-items:center !important;
+      justify-content:center !important;
       min-width:0 !important;
+      max-width:none !important;
       width:100% !important;
-      padding:7px 2px !important;
+      margin:0 !important;
+      padding:6px 2px !important;
       font-size:11px !important;
-      white-space:nowrap;
+      line-height:1.15 !important;
+      white-space:nowrap !important;
+      overflow:hidden !important;
     }
 
     .nav button span {
@@ -555,6 +586,11 @@ function injectExtraCSS() {
       display:grid !important;
       grid-template-columns:repeat(2,minmax(0,1fr)) !important;
       gap:8px !important;
+      margin-bottom:22px !important;
+    }
+
+    .quick-grid + .card {
+      margin-top:22px !important;
     }
 
     .poop-grid {
@@ -702,45 +738,27 @@ function injectExtraCSS() {
       }
     }
 
-    /* =========================================================
-       ★ UI調整：下部タブを横並び＆左寄せに
-       ========================================================= */
-    .nav {
-      display:block !important;
-      overflow:hidden !important;
-      padding:8px 0 calc(8px + env(safe-area-inset-bottom)) !important;
-    }
-
-    .nav-scroll {
-      display:flex !important;
-      justify-content:flex-start !important;
-      align-items:stretch !important;
-      gap:4px !important;
-      width:max-content !important;
-      min-width:100% !important;
-      padding:0 8px !important;
-      box-sizing:border-box !important;
-    }
-
-    .nav button {
-      flex:0 0 76px !important;
-      width:76px !important;
-      min-width:76px !important;
-      padding:6px 4px !important;
-      font-size:11px !important;
-      white-space:nowrap !important;
-    }
-
-    /* 生理・予定と「今日の記録」の間隔を広げる */
-    .quick-grid {
-      margin-bottom:24px !important;
-    }
-
-    .quick-grid + .card {
-      margin-top:0 !important;
-    }
-
     @media(max-width:380px) {
+
+      body {
+        padding-bottom:88px;
+      }
+
+      .nav {
+        padding-left:5px !important;
+        padding-right:5px !important;
+        gap:3px !important;
+      }
+
+      .nav button {
+        padding-left:1px !important;
+        padding-right:1px !important;
+        font-size:10px !important;
+      }
+
+      .nav button span {
+        font-size:20px !important;
+      }
 
       .stats {
         gap:4px !important;
@@ -807,7 +825,7 @@ async function boot() {
     console.warn("通知初期化失敗（無視）", e);
   }
 
-  await render();
+  render();
 }
 
 
@@ -4291,7 +4309,7 @@ async function home() {
   return `
     <header class="hero">
 
-      <h1>💩＆くすり記録</h1>
+      <h1>💩＆💊記録</h1>
 
       <p>
         タカちゃん × オタヤダ
