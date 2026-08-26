@@ -1,5 +1,5 @@
 /* =========================================================
-   💩＆💊記録アプリ
+   💩＆💊アプリ
    完全版 app.js
 ========================================================= */
 
@@ -48,7 +48,8 @@ const icons = {
    通知側でエラーが起きてもアプリ本体は停止しません。
 ========================================================= */
 
-
+// ここには「VAPID公開鍵」だけを入れます。秘密鍵は絶対に入れないでください。
+// 以前生成した vapid.txt の PUBLIC KEY をそのまま貼り付けてください。
 const VAPID_PUBLIC_KEY = "BJYEmRReeH1tVq966Ax0rokY7sfoya8qwzpBCi3Z_n3wprAzBUNKV1-A0VsJQbeAIpuX2hDv1sYvzleMto3yYeg";
 const PUSH_SW_PATH = "./sw.js";
 
@@ -130,35 +131,19 @@ async function enablePushNotifications() {
     const json = subscription.toJSON();
     const keys = json.keys || {};
 
-    // まず標準的な列構成で保存。通知テーブル側のRLSエラーならUIだけに通知し、アプリは継続。
-    const payload = {
-      user_id: user.id,
-      family_id: profile?.family_id || null,
-      endpoint: json.endpoint,
-      p256dh: keys.p256dh || null,
-      auth: keys.auth || null,
-      subscription: json,
-      enabled: true,
-      updated_at: new Date().toISOString()
-    };
-
-    let result = await sb
+    // 既存のSupabaseスキーマ（endpoint UNIQUE / p256dh / auth）に合わせて保存。
+    // push_subscriptions に enabled や subscription JSON が無くても動くようにしています。
+    const result = await sb
       .from("push_subscriptions")
-      .upsert(payload, { onConflict: "user_id,endpoint" });
-
-    // subscription JSON型を想定した簡易構成にもフォールバック。
-    if (result.error) {
-      result = await sb
-        .from("push_subscriptions")
-        .upsert({
-          user_id: user.id,
-          family_id: profile?.family_id || null,
-          endpoint: json.endpoint,
-          subscription: json,
-          enabled: true,
-          updated_at: new Date().toISOString()
-        }, { onConflict: "user_id,endpoint" });
-    }
+      .upsert({
+        user_id: user.id,
+        family_id: profile?.family_id || null,
+        endpoint: json.endpoint,
+        p256dh: keys.p256dh || "",
+        auth: keys.auth || "",
+        user_agent: navigator.userAgent,
+        updated_at: new Date().toISOString()
+      }, { onConflict: "endpoint" });
 
     if (result.error) throw result.error;
 
@@ -177,8 +162,9 @@ async function disablePushNotifications() {
     if (subscription) await subscription.unsubscribe();
 
     if (user) {
+      // 既存スキーマでは push_subscriptions に enabled 列がないため、購読自体を削除します。
       await sb.from("push_subscriptions")
-        .update({ enabled: false, updated_at: new Date().toISOString() })
+        .delete()
         .eq("user_id", user.id);
       await saveNotificationPreference(false);
     }
@@ -195,8 +181,9 @@ async function saveNotificationPreference(enabledOverride = null) {
   if (!user) return;
   const time = document.getElementById("notifyTime")?.value || localStorage.getItem("notifyTime") || "20:00";
   const message = document.getElementById("notifyMessage")?.value || localStorage.getItem("notifyMessage") || "今日の体調・服薬記録はしましたか？";
+  const checkbox = document.getElementById("notifyEnabled");
   const enabled = enabledOverride === null
-    ? document.getElementById("notifyEnabled")?.checked || false
+    ? (checkbox ? checkbox.checked : localStorage.getItem("notifyEnabled") === "true")
     : enabledOverride;
 
   localStorage.setItem("notifyTime", time);
@@ -210,7 +197,7 @@ async function saveNotificationPreference(enabledOverride = null) {
         user_id: user.id,
         family_id: profile?.family_id || null,
         enabled,
-        notify_time: time,
+        daily_time: time,
         message,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Tokyo",
         updated_at: new Date().toISOString()
@@ -221,6 +208,24 @@ async function saveNotificationPreference(enabledOverride = null) {
   }
 }
 
+async function notifyFamilyRecord(type, detail = "") {
+  try {
+    if (!user || !profile?.family_id) return;
+    await sb.functions.invoke("send-notifications", {
+      body: {
+        event: "record",
+        user_id: user.id,
+        family_id: profile.family_id,
+        record_type: type,
+        detail
+      }
+    });
+  } catch (e) {
+    // 記録保存そのものは成功しているので、通知失敗では記録を巻き戻さない。
+    console.warn("相方への記録通知に失敗", e);
+  }
+}
+
 async function saveNotificationSettingsFromUI() {
   await saveNotificationPreference(null);
   flash("💾 通知設定を保存しました");
@@ -228,16 +233,24 @@ async function saveNotificationSettingsFromUI() {
 
 async function testPushNotification() {
   try {
-    const reg = await registerPushServiceWorker();
-    if (!reg) throw new Error("Service Workerが利用できません");
-    await reg.showNotification("💩＆💊記録", {
-      body: document.getElementById("notifyMessage")?.value || "テスト通知です！",
-      icon: "./icon-192.png",
-      badge: "./icon-192.png",
-      tag: "health-app-test",
-      data: { url: location.href }
+    if (!user) {
+      flash("先にログインしてください");
+      return;
+    }
+
+    const sub = await getPushSubscription();
+    if (!sub || Notification.permission !== "granted") {
+      flash("先に「通知をONにする」を設定してください");
+      return;
+    }
+
+    // Edge Function経由で送るため、アプリを閉じた状態のPushも確認できます。
+    const { data, error } = await sb.functions.invoke("send-notifications", {
+      body: { test: true, user_id: user.id }
     });
-    flash("🔔 テスト通知を送りました！");
+
+    if (error) throw error;
+    flash(data?.sent ? "🔔 サーバーからテスト通知を送信しました！" : "📭 通知先がありません");
   } catch (e) {
     console.error(e);
     flash("テスト通知に失敗しました：" + (e.message || e));
@@ -515,7 +528,7 @@ function injectExtraCSS() {
       min-width:0 !important;
       margin:0 !important;
       transform:none !important;
-      z-index:9990 !important;
+      z-index:10000 !important;
       display:grid !important;
       grid-template-columns:repeat(4,minmax(0,1fr)) !important;
       align-items:stretch !important;
@@ -549,12 +562,52 @@ function injectExtraCSS() {
       margin-bottom:2px;
     }
 
+    .nav button b {
+      font-size:11px;
+      line-height:1.15;
+      font-weight:900;
+    }
+
+    .calendar-link {
+      flex:0 0 42px !important;
+      width:42px !important;
+      min-width:42px !important;
+      height:42px !important;
+      padding:0 !important;
+      display:grid !important;
+      place-items:center !important;
+      font-size:22px !important;
+      line-height:1 !important;
+    }
+
+    .calendar-link span {
+      display:block;
+      font-size:22px;
+      line-height:1;
+      margin:0;
+    }
+
+    .modal-sticky-actions {
+      position:sticky;
+      bottom:-18px;
+      padding:10px 0 18px;
+      background:linear-gradient(to bottom, rgba(255,255,255,.82), #fff 28%);
+      z-index:5;
+    }
+
+    .modal-sticky-actions .btn {
+      width:100%;
+      min-height:50px;
+      font-size:16px;
+    }
+
     .panel {
       width:100%;
       max-width:720px;
       margin:0 auto;
       padding-left:12px !important;
       padding-right:12px !important;
+      padding-bottom:150px !important;
     }
 
     .card {
@@ -638,6 +691,16 @@ function injectExtraCSS() {
 
     .tab {
       flex:0 0 auto;
+    }
+
+    .overlay {
+      z-index:20000 !important;
+      padding-bottom:env(safe-area-inset-bottom);
+    }
+
+    .modal {
+      max-height:90vh !important;
+      padding-bottom:calc(18px + env(safe-area-inset-bottom)) !important;
     }
 
     .record-actions {
@@ -1480,6 +1543,7 @@ async function poopAdd(type, button) {
 
     if (error) throw error;
 
+    await notifyFamilyRecord("poop", `${poop[type]?.[0] || "ウンチ"}を記録しました`);
     flash("💩 ブワァァァッ！！記録したよ！");
 
     render();
@@ -1547,6 +1611,7 @@ async function medAdd(
 
     if (error) throw error;
 
+    await notifyFamilyRecord("medicine", `${name}を記録しました`);
     flash(
       `${icon} ${name}を飲んだ！`
     );
@@ -1875,6 +1940,7 @@ async function saveVomit() {
 
     if (error) throw error;
 
+    await notifyFamilyRecord("vomit", "吐いた記録を登録しました");
     closeModal();
 
     flash("🤢 記録したよ");
@@ -1982,6 +2048,7 @@ async function saveWeight() {
 
     if (error) throw error;
 
+    await notifyFamilyRecord("weight", `体重 ${weight}kgを記録しました`);
     closeModal();
 
     flash("⚖️ 保存したよ");
@@ -2104,6 +2171,7 @@ async function savePeriod() {
 
     if (error) throw error;
 
+    await notifyFamilyRecord("period", "生理記録を登録しました");
     closeModal();
 
     flash("🌸 生理記録を保存しました");
@@ -3038,14 +3106,9 @@ async function calendar() {
       <div class="card datebar">
 
         <button
-          onclick="
-            date = new Date(
-              year,
-              month - 1,
-              1
-            );
-            render()
-          "
+          type="button"
+          aria-label="前の月"
+          onclick="changeCalendarMonth(-1)"
         >
           ‹
         </button>
@@ -3055,14 +3118,9 @@ async function calendar() {
         </div>
 
         <button
-          onclick="
-            date = new Date(
-              year,
-              month + 1,
-              1
-            );
-            render()
-          "
+          type="button"
+          aria-label="次の月"
+          onclick="changeCalendarMonth(1)"
         >
           ›
         </button>
@@ -3170,14 +3228,17 @@ async function calendar() {
    Calendar day
 ========================================================= */
 
+function changeCalendarMonth(amount) {
+  const d = new Date(date);
+  d.setDate(1);
+  d.setMonth(d.getMonth() + amount);
+  date = d;
+  render();
+}
+
 function calendarDay(key) {
-
-  date =
-    new Date(
-      `${key}T00:00:00`
-    );
-
-  eventModal(key);
+  date = new Date(`${key}T00:00:00`);
+  render();
 }
 
 
@@ -3263,16 +3324,19 @@ function eventModal(
 
         </select>
 
-        <button
-          class="btn primary"
-          onclick="${
-            edit
-              ? `updateEvent('${event.id}')`
-              : "saveEvent()"
-          }"
-        >
-          💾 ${edit ? "保存" : "追加"}
-        </button>
+        <div class="modal-sticky-actions">
+          <button
+            type="button"
+            class="btn primary"
+            onclick="${
+              edit
+                ? `updateEvent('${event.id}')`
+                : "saveEvent()"
+            }"
+          >
+            ✅ ${edit ? "予定を確定して保存" : "予定を確定して登録"}
+          </button>
+        </div>
 
         ${
           edit
@@ -4309,7 +4373,7 @@ async function home() {
   return `
     <header class="hero">
 
-      <h1>💩＆💊記録</h1>
+      <h1>💩＆💊</h1>
 
       <p>
         タカちゃん × オタヤダ
@@ -4347,10 +4411,12 @@ async function home() {
         </button>
 
         <button
-          class="btn soft"
+          type="button"
+          class="btn soft calendar-link"
+          aria-label="カレンダーを開く"
           onclick="go('calendar')"
         >
-          📅
+          <span>📅</span>
         </button>
 
       </div>
@@ -5317,21 +5383,19 @@ async function allRecords() {
 
 function nav(active) {
   return `
-    <nav class="nav">
-      <div class="nav-scroll">
-        <button class="${active === "home" ? "active" : ""}" onclick="go('home')">
-          <span>🏠</span>ホーム
-        </button>
-        <button class="${active === "calendar" ? "active" : ""}" onclick="go('calendar')">
-          <span>📅</span>カレンダー
-        </button>
-        <button class="${active === "pregnancy" ? "active" : ""}" onclick="go('pregnancy')">
-          <span>🤰</span>妊娠
-        </button>
-        <button class="${active === "settings" ? "active" : ""}" onclick="go('settings')">
-          <span>❤️</span>夫婦
-        </button>
-      </div>
+    <nav class="nav" aria-label="メインメニュー">
+      <button type="button" class="${active === "home" ? "active" : ""}" onclick="go('home')">
+        <span>🏠</span><b>ホーム</b>
+      </button>
+      <button type="button" class="${active === "calendar" ? "active" : ""}" onclick="go('calendar')">
+        <span>📅</span><b>カレンダー</b>
+      </button>
+      <button type="button" class="${active === "pregnancy" ? "active" : ""}" onclick="go('pregnancy')">
+        <span>🤰</span><b>妊娠</b>
+      </button>
+      <button type="button" class="${active === "settings" ? "active" : ""}" onclick="go('settings')">
+        <span>❤️</span><b>夫婦</b>
+      </button>
     </nav>
   `;
 }

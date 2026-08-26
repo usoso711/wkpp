@@ -14,7 +14,7 @@ self.addEventListener("push", event => {
     data = { body: event.data ? event.data.text() : "通知があります" };
   }
 
-  const title = data.title || "💩＆くすり記録";
+  const title = data.title || "💩＆💊記録";
   const options = {
     body: data.body || data.message || "今日の記録を確認してね！",
     icon: data.icon || "./icon-192.png",
