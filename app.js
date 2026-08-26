@@ -42,160 +42,213 @@ const icons = {
 };
 
 
-
 /* =========================================================
-   🔔 Web Push 通知（アプリを閉じても届く版）
+   🔔 通知 / Web Push
+   重要：通知機能はログイン画面・通常アプリ起動から完全分離。
+   通知側でエラーが起きてもアプリ本体は停止しません。
 ========================================================= */
 
+
 const VAPID_PUBLIC_KEY = "BJYEmRReeH1tVq966Ax0rokY7sfoya8qwzpBCi3Z_n3wprAzBUNKV1-A0VsJQbeAIpuX2hDv1sYvzleMto3yYeg";
+const PUSH_SW_PATH = "./sw.js";
 
-function pushSupported() {
-  return window.isSecureContext &&
+function notificationSupported() {
+  return (
+    window.isSecureContext &&
+    "Notification" in window &&
     "serviceWorker" in navigator &&
-    "PushManager" in window &&
-    "Notification" in window;
-}
-
-async function registerPushServiceWorker() {
-  if (!pushSupported()) return null;
-  return navigator.serviceWorker.register("./sw.js", { scope: "./" });
+    "PushManager" in window
+  );
 }
 
 function urlBase64ToUint8Array(base64String) {
-  const padding = "=".repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, "+")
+    .replace(/_/g, "/");
   const rawData = atob(base64);
   return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
 }
 
-async function getPushSubscription() {
-  const reg = await registerPushServiceWorker();
-  return reg?.pushManager.getSubscription();
+async function registerPushServiceWorker() {
+  try {
+    if (!notificationSupported()) return null;
+    const reg = await navigator.serviceWorker.register(PUSH_SW_PATH, { scope: "./" });
+    await navigator.serviceWorker.ready;
+    return reg;
+  } catch (e) {
+    console.warn("Service Worker登録失敗（アプリ本体には影響なし）", e);
+    return null;
+  }
 }
 
-async function requestNotificationPermission() {
-  if (!pushSupported()) {
-    flash("📱 iPhoneはホーム画面に追加したアプリから通知を設定してね");
-    return false;
+async function getPushSubscription() {
+  try {
+    const reg = await registerPushServiceWorker();
+    if (!reg) return null;
+    return await reg.pushManager.getSubscription();
+  } catch (e) {
+    console.warn("Push購読取得失敗", e);
+    return null;
   }
-  const permission = await Notification.requestPermission();
-  if (permission !== "granted") {
-    flash("🔕 通知が許可されませんでした");
-    return false;
-  }
-  return true;
 }
 
 async function enablePushNotifications() {
+  if (!user) {
+    flash("先にログインしてください");
+    return;
+  }
+
+  if (!notificationSupported()) {
+    flash("iPhoneではSafariからホーム画面に追加したPWAで利用してください");
+    return;
+  }
+
+  if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY.includes("PASTE_YOUR")) {
+    flash("VAPID公開鍵をapp.jsに設定してください");
+    return;
+  }
+
   try {
-    const ok = await requestNotificationPermission();
-    if (!ok) return;
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      flash("通知が許可されませんでした。iPhoneの設定を確認してください");
+      return;
+    }
+
     const reg = await registerPushServiceWorker();
-    let sub = await reg.pushManager.getSubscription();
-    if (!sub) {
-      sub = await reg.pushManager.subscribe({
+    if (!reg) throw new Error("Service Workerを登録できませんでした");
+
+    let subscription = await reg.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       });
     }
-    const j = sub.toJSON();
-    const { error } = await sb.from("push_subscriptions").upsert({
+
+    const json = subscription.toJSON();
+    const keys = json.keys || {};
+
+    // まず標準的な列構成で保存。通知テーブル側のRLSエラーならUIだけに通知し、アプリは継続。
+    const payload = {
       user_id: user.id,
-      family_id: profile.family_id,
-      endpoint: j.endpoint,
-      p256dh: j.keys?.p256dh,
-      auth: j.keys?.auth,
-      user_agent: navigator.userAgent,
-      updated_at: new Date().toISOString()
-    }, { onConflict: "endpoint" });
-    if (error) throw error;
-    await sb.from("notification_preferences").upsert({
-      user_id: user.id,
-      family_id: profile.family_id,
+      family_id: profile?.family_id || null,
+      endpoint: json.endpoint,
+      p256dh: keys.p256dh || null,
+      auth: keys.auth || null,
+      subscription: json,
       enabled: true,
       updated_at: new Date().toISOString()
-    }, { onConflict: "user_id" });
+    };
+
+    let result = await sb
+      .from("push_subscriptions")
+      .upsert(payload, { onConflict: "user_id,endpoint" });
+
+    // subscription JSON型を想定した簡易構成にもフォールバック。
+    if (result.error) {
+      result = await sb
+        .from("push_subscriptions")
+        .upsert({
+          user_id: user.id,
+          family_id: profile?.family_id || null,
+          endpoint: json.endpoint,
+          subscription: json,
+          enabled: true,
+          updated_at: new Date().toISOString()
+        }, { onConflict: "user_id,endpoint" });
+    }
+
+    if (result.error) throw result.error;
+
+    await saveNotificationPreference(true);
     flash("🔔 通知をONにしました！");
-    closeModal();
-    notificationModal();
+    render();
   } catch (e) {
-    console.error(e);
-    flash("通知設定に失敗：" + e.message);
+    console.error("Push有効化エラー", e);
+    flash("通知設定に失敗しました：" + (e.message || e));
   }
 }
 
 async function disablePushNotifications() {
   try {
-    const sub = await getPushSubscription();
-    if (sub) {
-      await sb.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
-      await sub.unsubscribe();
-    }
-    await sb.from("notification_preferences").upsert({
-      user_id: user.id, family_id: profile.family_id, enabled: false, updated_at: new Date().toISOString()
-    }, { onConflict: "user_id" });
-    flash("🔕 通知をOFFにしました");
-    closeModal();
-    notificationModal();
-  } catch (e) { flash("通知OFFに失敗：" + e.message); }
-}
+    const subscription = await getPushSubscription();
+    if (subscription) await subscription.unsubscribe();
 
-async function sendTestNotification() {
-  try {
-    const { data, error } = await sb.functions.invoke("send-notifications", {
-      body: { test: true, user_id: user.id }
-    });
-    if (error) throw error;
-    flash(data?.sent ? "📨 テスト通知を送信しました" : "📭 通知先がありません");
+    if (user) {
+      await sb.from("push_subscriptions")
+        .update({ enabled: false, updated_at: new Date().toISOString() })
+        .eq("user_id", user.id);
+      await saveNotificationPreference(false);
+    }
+
+    flash("🔕 通知をOFFにしました");
+    render();
   } catch (e) {
     console.error(e);
-    flash("テスト通知に失敗：" + e.message);
+    flash("通知OFFに失敗しました");
   }
 }
 
-async function notificationModal() {
-  const { data: settings } = await sb.from("notification_preferences")
-    .select("*").eq("user_id", user.id).maybeSingle();
-  const sub = await getPushSubscription().catch(() => null);
-  const permission = !pushSupported() ? "非対応" : Notification.permission;
-  const enabled = !!settings?.enabled && !!sub;
-  modal("🔔 通知設定", `
-    <div class="form-grid">
-      <div class="notice" style="padding:12px;border-radius:14px;line-height:1.7">
-        現在の状態：<b>${enabled ? "通知ON ✅" : "通知OFF"}</b><br>
-        端末権限：<b>${permission}</b>
-      </div>
-      ${enabled ? `
-        <button class="btn soft" style="width:100%" onclick="disablePushNotifications()">🔕 通知をOFFにする</button>
-      ` : `
-        <button class="btn primary" style="width:100%" onclick="enablePushNotifications()">🔔 通知をONにする</button>
-      `}
-      <label style="font-weight:800">毎日の通知時刻</label>
-      <input id="notifyTime" class="input" type="time" value="${esc(settings?.daily_time || "20:00")}">
-      <label style="font-weight:800">通知メッセージ</label>
-      <textarea id="notifyMessage" class="input textarea">${esc(settings?.message || "💊 今日の葉酸サプリ・薬、飲んだ？")}</textarea>
-      <button class="btn primary" style="width:100%" onclick="saveNotificationFromModal()">💾 通知設定を保存</button>
-      <button class="btn soft" style="width:100%" onclick="sendTestNotification()">🧪 今すぐテスト通知</button>
-      <div class="empty" style="font-size:12px;line-height:1.7">
-        iPhoneはSafariでこのアプリを「ホーム画面に追加」してから通知をONにしてください。
-        設定後はアプリを閉じていても、サーバーから指定時刻に通知します。
-      </div>
-    </div>
-  `);
+async function saveNotificationPreference(enabledOverride = null) {
+  if (!user) return;
+  const time = document.getElementById("notifyTime")?.value || localStorage.getItem("notifyTime") || "20:00";
+  const message = document.getElementById("notifyMessage")?.value || localStorage.getItem("notifyMessage") || "今日の体調・服薬記録はしましたか？";
+  const enabled = enabledOverride === null
+    ? document.getElementById("notifyEnabled")?.checked || false
+    : enabledOverride;
+
+  localStorage.setItem("notifyTime", time);
+  localStorage.setItem("notifyMessage", message);
+  localStorage.setItem("notifyEnabled", String(enabled));
+
+  try {
+    const { error } = await sb
+      .from("notification_preferences")
+      .upsert({
+        user_id: user.id,
+        family_id: profile?.family_id || null,
+        enabled,
+        notify_time: time,
+        message,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Tokyo",
+        updated_at: new Date().toISOString()
+      }, { onConflict: "user_id" });
+    if (error) console.warn("通知設定DB保存失敗", error);
+  } catch (e) {
+    console.warn("通知設定DB保存失敗", e);
+  }
 }
 
-async function saveNotificationFromModal() {
-  const daily_time = document.getElementById("notifyTime")?.value || "20:00";
-  const message = document.getElementById("notifyMessage")?.value?.trim() || "💊 今日の葉酸サプリ・薬、飲んだ？";
-  const { error } = await sb.from("notification_preferences").upsert({
-    user_id: user.id, family_id: profile.family_id, daily_time, message,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Tokyo",
-    updated_at: new Date().toISOString()
-  }, { onConflict: "user_id" });
-  if (error) { flash("保存できません：" + error.message); return; }
-  closeModal();
-  flash(`🔔 ${daily_time}に通知する設定を保存したよ！`);
+async function saveNotificationSettingsFromUI() {
+  await saveNotificationPreference(null);
+  flash("💾 通知設定を保存しました");
 }
+
+async function testPushNotification() {
+  try {
+    const reg = await registerPushServiceWorker();
+    if (!reg) throw new Error("Service Workerが利用できません");
+    await reg.showNotification("💩＆くすり記録", {
+      body: document.getElementById("notifyMessage")?.value || "テスト通知です！",
+      icon: "./icon-192.png",
+      badge: "./icon-192.png",
+      tag: "health-app-test",
+      data: { url: location.href }
+    });
+    flash("🔔 テスト通知を送りました！");
+  } catch (e) {
+    console.error(e);
+    flash("テスト通知に失敗しました：" + (e.message || e));
+  }
+}
+
+async function notificationStatus() {
+  const subscription = await getPushSubscription();
+  return !!subscription && Notification.permission === "granted";
+}
+
 
 /* =========================================================
    共通
@@ -726,8 +779,6 @@ async function boot() {
     return;
   }
 
-  try { await registerPushServiceWorker(); } catch (e) { console.warn("Service Worker registration failed", e); }
-
   const {
     data: { session }
   } = await sb.auth.getSession();
@@ -748,8 +799,15 @@ async function boot() {
 
   await loadFamily();
 
-  startNotificationChecker();
-  render();
+  // 通知の初期化は「ログイン後」に限定。失敗してもアプリ本体は止めない。
+  try {
+    const notifyEnabled = localStorage.getItem("notifyEnabled") === "true";
+    if (notifyEnabled) await registerPushServiceWorker();
+  } catch (e) {
+    console.warn("通知初期化失敗（無視）", e);
+  }
+
+  await render();
 }
 
 
@@ -4273,17 +4331,8 @@ async function home() {
         <button
           class="btn soft"
           onclick="go('calendar')"
-          aria-label="カレンダー"
         >
           📅
-        </button>
-
-        <button
-          class="btn soft"
-          onclick="notificationModal()"
-          aria-label="通知設定"
-        >
-          🔔
         </button>
 
       </div>
@@ -5044,6 +5093,25 @@ async function settings() {
           📒 履歴を見る
         </button>
 
+      </div>
+
+
+      <div class="card">
+        <div class="section-title">🔔 通知設定</div>
+        <p class="hint">アプリを閉じていても、サーバーから指定時刻にPush通知を送ります。</p>
+
+        <div class="form-grid">
+          <label style="font-weight:900">通知時刻</label>
+          <input id="notifyTime" class="input" type="time" value="${esc(localStorage.getItem("notifyTime") || "20:00")}">
+          <textarea id="notifyMessage" class="input textarea" placeholder="通知メッセージ">${esc(localStorage.getItem("notifyMessage") || "今日の体調・服薬記録はしましたか？")}</textarea>
+
+          <button class="btn primary" onclick="saveNotificationSettingsFromUI()">💾 時刻・メッセージを保存</button>
+          <button class="btn soft" onclick="enablePushNotifications()">🔔 通知をONにする</button>
+          <button class="btn soft" onclick="testPushNotification()">🧪 テスト通知</button>
+          <button class="btn danger" onclick="disablePushNotifications()">🔕 通知をOFFにする</button>
+        </div>
+
+        <p class="hint" style="margin-top:10px">iPhoneはSafari → 共有 → ホーム画面に追加 → ホーム画面のアプリから通知ONにしてください。</p>
       </div>
 
 

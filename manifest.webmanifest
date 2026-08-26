@@ -1,12 +1,11 @@
 {
-  "name": "💩＆くすり記録",
-  "short_name": "💩＆くすり",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#fff9fc",
-  "theme_color": "#ff8fb3",
-  "description": "夫婦で使う体調・服薬・妊娠記録アプリ",
-  "icons": [
+  "name":"💩＆くすり記録",
+  "short_name":"💩＆💊",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#ffffff",
+  "theme_color":"#8c62e8",
+  "icons":[
     {"src":"./icon-192.png","sizes":"192x192","type":"image/png"},
     {"src":"./icon-512.png","sizes":"512x512","type":"image/png"}
   ]
