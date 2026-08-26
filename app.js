@@ -1,5 +1,5 @@
 /* =========================================================
-   💩&💊 記録アプリ
+   💩＆くすり記録アプリ
    完全版 app.js
 ========================================================= */
 
@@ -41,6 +41,161 @@ const icons = {
   note: "📝"
 };
 
+
+
+/* =========================================================
+   🔔 Web Push 通知（アプリを閉じても届く版）
+========================================================= */
+
+const VAPID_PUBLIC_KEY = "BJYEmRReeH1tVq966Ax0rokY7sfoya8qwzpBCi3Z_n3wprAzBUNKV1-A0VsJQbeAIpuX2hDv1sYvzleMto3yYeg";
+
+function pushSupported() {
+  return window.isSecureContext &&
+    "serviceWorker" in navigator &&
+    "PushManager" in window &&
+    "Notification" in window;
+}
+
+async function registerPushServiceWorker() {
+  if (!pushSupported()) return null;
+  return navigator.serviceWorker.register("./sw.js", { scope: "./" });
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+
+async function getPushSubscription() {
+  const reg = await registerPushServiceWorker();
+  return reg?.pushManager.getSubscription();
+}
+
+async function requestNotificationPermission() {
+  if (!pushSupported()) {
+    flash("📱 iPhoneはホーム画面に追加したアプリから通知を設定してね");
+    return false;
+  }
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") {
+    flash("🔕 通知が許可されませんでした");
+    return false;
+  }
+  return true;
+}
+
+async function enablePushNotifications() {
+  try {
+    const ok = await requestNotificationPermission();
+    if (!ok) return;
+    const reg = await registerPushServiceWorker();
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+    const j = sub.toJSON();
+    const { error } = await sb.from("push_subscriptions").upsert({
+      user_id: user.id,
+      family_id: profile.family_id,
+      endpoint: j.endpoint,
+      p256dh: j.keys?.p256dh,
+      auth: j.keys?.auth,
+      user_agent: navigator.userAgent,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "endpoint" });
+    if (error) throw error;
+    await sb.from("notification_preferences").upsert({
+      user_id: user.id,
+      family_id: profile.family_id,
+      enabled: true,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "user_id" });
+    flash("🔔 通知をONにしました！");
+    closeModal();
+    notificationModal();
+  } catch (e) {
+    console.error(e);
+    flash("通知設定に失敗：" + e.message);
+  }
+}
+
+async function disablePushNotifications() {
+  try {
+    const sub = await getPushSubscription();
+    if (sub) {
+      await sb.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
+      await sub.unsubscribe();
+    }
+    await sb.from("notification_preferences").upsert({
+      user_id: user.id, family_id: profile.family_id, enabled: false, updated_at: new Date().toISOString()
+    }, { onConflict: "user_id" });
+    flash("🔕 通知をOFFにしました");
+    closeModal();
+    notificationModal();
+  } catch (e) { flash("通知OFFに失敗：" + e.message); }
+}
+
+async function sendTestNotification() {
+  try {
+    const { data, error } = await sb.functions.invoke("send-notifications", {
+      body: { test: true, user_id: user.id }
+    });
+    if (error) throw error;
+    flash(data?.sent ? "📨 テスト通知を送信しました" : "📭 通知先がありません");
+  } catch (e) {
+    console.error(e);
+    flash("テスト通知に失敗：" + e.message);
+  }
+}
+
+async function notificationModal() {
+  const { data: settings } = await sb.from("notification_preferences")
+    .select("*").eq("user_id", user.id).maybeSingle();
+  const sub = await getPushSubscription().catch(() => null);
+  const permission = !pushSupported() ? "非対応" : Notification.permission;
+  const enabled = !!settings?.enabled && !!sub;
+  modal("🔔 通知設定", `
+    <div class="form-grid">
+      <div class="notice" style="padding:12px;border-radius:14px;line-height:1.7">
+        現在の状態：<b>${enabled ? "通知ON ✅" : "通知OFF"}</b><br>
+        端末権限：<b>${permission}</b>
+      </div>
+      ${enabled ? `
+        <button class="btn soft" style="width:100%" onclick="disablePushNotifications()">🔕 通知をOFFにする</button>
+      ` : `
+        <button class="btn primary" style="width:100%" onclick="enablePushNotifications()">🔔 通知をONにする</button>
+      `}
+      <label style="font-weight:800">毎日の通知時刻</label>
+      <input id="notifyTime" class="input" type="time" value="${esc(settings?.daily_time || "20:00")}">
+      <label style="font-weight:800">通知メッセージ</label>
+      <textarea id="notifyMessage" class="input textarea">${esc(settings?.message || "💊 今日の葉酸サプリ・薬、飲んだ？")}</textarea>
+      <button class="btn primary" style="width:100%" onclick="saveNotificationFromModal()">💾 通知設定を保存</button>
+      <button class="btn soft" style="width:100%" onclick="sendTestNotification()">🧪 今すぐテスト通知</button>
+      <div class="empty" style="font-size:12px;line-height:1.7">
+        iPhoneはSafariでこのアプリを「ホーム画面に追加」してから通知をONにしてください。
+        設定後はアプリを閉じていても、サーバーから指定時刻に通知します。
+      </div>
+    </div>
+  `);
+}
+
+async function saveNotificationFromModal() {
+  const daily_time = document.getElementById("notifyTime")?.value || "20:00";
+  const message = document.getElementById("notifyMessage")?.value?.trim() || "💊 今日の葉酸サプリ・薬、飲んだ？";
+  const { error } = await sb.from("notification_preferences").upsert({
+    user_id: user.id, family_id: profile.family_id, daily_time, message,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Tokyo",
+    updated_at: new Date().toISOString()
+  }, { onConflict: "user_id" });
+  if (error) { flash("保存できません：" + error.message); return; }
+  closeModal();
+  flash(`🔔 ${daily_time}に通知する設定を保存したよ！`);
+}
 
 /* =========================================================
    共通
@@ -241,25 +396,16 @@ function injectExtraCSS() {
       box-sizing:border-box;
     }
 
-    html,
-    body {
+    html,body {
       margin:0;
       padding:0;
       width:100%;
       max-width:100%;
-      min-width:0;
       overflow-x:hidden;
     }
 
     body {
-      padding-bottom:100px;
-    }
-
-    #app {
-      width:100%;
-      max-width:100%;
-      min-width:0;
-      overflow-x:hidden;
+      padding-bottom:90px;
     }
 
     button,
@@ -289,79 +435,35 @@ function injectExtraCSS() {
       text-shadow:none !important;
     }
 
-
-    /* =====================================================
-       ★ 下部ナビ修正
-       画面幅いっぱい・4列固定
-    ===================================================== */
-
     .nav {
       position:fixed !important;
       left:0 !important;
       right:0 !important;
       bottom:0 !important;
-
-      width:100vw !important;
-      max-width:none !important;
-      min-width:0 !important;
-
-      margin:0 !important;
-
+      width:100% !important;
+      max-width:100% !important;
       z-index:9990;
-
       display:grid !important;
-      grid-template-columns:
-        repeat(4, minmax(0, 1fr)) !important;
-
-      gap:4px !important;
-
-      padding:
-        7px
-        6px
-        calc(7px + env(safe-area-inset-bottom))
-        6px !important;
-
+      grid-template-columns:repeat(4,1fr) !important;
+      padding:8px 8px calc(8px + env(safe-area-inset-bottom)) !important;
+      gap:5px !important;
       box-sizing:border-box !important;
-
-      transform:none !important;
     }
 
     .nav button {
-      display:flex !important;
-      flex-direction:column !important;
-      align-items:center !important;
-      justify-content:center !important;
-
       min-width:0 !important;
       width:100% !important;
-      max-width:none !important;
-
-      padding:6px 2px !important;
-
+      padding:7px 2px !important;
       font-size:11px !important;
-      line-height:1.15 !important;
-
-      white-space:nowrap !important;
-      overflow:hidden !important;
-      text-overflow:ellipsis !important;
+      white-space:nowrap;
     }
 
     .nav button span {
-      display:block !important;
-      width:100% !important;
-
-      font-size:21px !important;
-      line-height:22px !important;
-
-      margin:0 0 2px !important;
-
-      text-align:center !important;
+      display:block;
+      font-size:21px;
+      line-height:22px;
+      margin-bottom:2px;
     }
-
-
-    /* =====================================================
-       パネル
-    ===================================================== */
 
     .panel {
       width:100%;
@@ -377,61 +479,9 @@ function injectExtraCSS() {
       overflow:hidden;
     }
 
-
-    /* =====================================================
-       日付バー
-    ===================================================== */
-
-    .datebar {
-      display:flex !important;
-      align-items:center !important;
-      gap:8px !important;
-    }
-
-    .datebar .date {
-      flex:1 !important;
-      min-width:0 !important;
-      text-align:center !important;
-    }
-
-    .calendar-icon-btn {
-      flex:0 0 48px !important;
-
-      width:48px !important;
-      height:48px !important;
-
-      min-width:48px !important;
-      min-height:48px !important;
-
-      padding:0 !important;
-
-      display:flex !important;
-      align-items:center !important;
-      justify-content:center !important;
-
-      border-radius:15px !important;
-
-      font-size:24px !important;
-      line-height:1 !important;
-
-      overflow:hidden !important;
-    }
-
-    .calendar-icon-btn span {
-      display:block !important;
-      line-height:1 !important;
-      transform:translateY(0) !important;
-    }
-
-
-    /* =====================================================
-       統計
-    ===================================================== */
-
     .stats {
       display:grid !important;
-      grid-template-columns:
-        repeat(4, minmax(0, 1fr)) !important;
+      grid-template-columns:repeat(4,minmax(0,1fr)) !important;
       gap:7px !important;
     }
 
@@ -448,53 +498,28 @@ function injectExtraCSS() {
       font-size:10px;
     }
 
-
-    /* =====================================================
-       クイックボタン
-    ===================================================== */
-
     .quick-grid {
       display:grid !important;
-      grid-template-columns:
-        repeat(2, minmax(0, 1fr)) !important;
+      grid-template-columns:repeat(2,minmax(0,1fr)) !important;
       gap:8px !important;
-
-      margin-bottom:18px !important;
     }
-
-    .quick-grid + .card {
-      margin-top:20px !important;
-    }
-
-
-    /* =====================================================
-       ウンチ・薬
-    ===================================================== */
 
     .poop-grid {
       display:grid !important;
-      grid-template-columns:
-        repeat(2, minmax(0, 1fr)) !important;
+      grid-template-columns:repeat(2,minmax(0,1fr)) !important;
       gap:10px !important;
     }
 
     .med-grid {
       display:grid !important;
-      grid-template-columns:
-        repeat(2, minmax(0, 1fr)) !important;
+      grid-template-columns:repeat(2,minmax(0,1fr)) !important;
       gap:8px !important;
     }
-
-
-    /* =====================================================
-       カレンダー
-    ===================================================== */
 
     .calendar {
       width:100%;
       display:grid !important;
-      grid-template-columns:
-        repeat(7, minmax(0, 1fr)) !important;
+      grid-template-columns:repeat(7,minmax(0,1fr)) !important;
       gap:3px !important;
     }
 
@@ -509,16 +534,6 @@ function injectExtraCSS() {
       font-size:12px;
       display:inline-block;
     }
-
-    .day.selected {
-      outline:3px solid #9d78c9 !important;
-      outline-offset:-3px !important;
-    }
-
-
-    /* =====================================================
-       タブ
-    ===================================================== */
 
     .tabs {
       display:flex;
@@ -535,11 +550,6 @@ function injectExtraCSS() {
     .tab {
       flex:0 0 auto;
     }
-
-
-    /* =====================================================
-       記録
-    ===================================================== */
 
     .record-actions {
       display:flex;
@@ -565,11 +575,6 @@ function injectExtraCSS() {
       background:#ffe4e4;
       color:#b53b3b;
     }
-
-
-    /* =====================================================
-       予定・検診・質問
-    ===================================================== */
 
     .event-item,
     .checkup-item,
@@ -622,54 +627,10 @@ function injectExtraCSS() {
       overflow-y:auto;
     }
 
-
-    /* =====================================================
-       カレンダー日付詳細
-    ===================================================== */
-
-    .selected-day-header {
-      background:linear-gradient(
-        135deg,
-        #f7edff,
-        #fff8fc
-      );
-
-      border:2px solid #ead9f5;
-
-      border-radius:20px;
-
-      padding:16px;
-
-      margin-bottom:12px;
-
-      text-align:center;
-    }
-
-    .selected-day-header .big-date {
-      font-size:23px;
-      font-weight:1000;
-    }
-
-    .selected-day-header .day-label {
-      margin-top:4px;
-      color:#806a8c;
-      font-size:13px;
-      font-weight:900;
-    }
-
-
-    /* =====================================================
-       ウンチ演出
-    ===================================================== */
-
     @keyframes poopFly {
-
       0% {
         opacity:1;
-        transform:
-          translate(-50%,-50%)
-          scale(.3)
-          rotate(0);
+        transform:translate(-50%,-50%) scale(.3) rotate(0);
       }
 
       70% {
@@ -686,9 +647,45 @@ function injectExtraCSS() {
           scale(1.15)
           rotate(var(--r));
       }
-
     }
 
+    /* =========================================================
+       ★ UI調整：下部タブを横並び＆左寄せに
+       ========================================================= */
+    .nav {
+      display:block !important;
+      overflow:hidden !important;
+      padding:8px 0 calc(8px + env(safe-area-inset-bottom)) !important;
+    }
+
+    .nav-scroll {
+      display:flex !important;
+      justify-content:flex-start !important;
+      align-items:stretch !important;
+      gap:4px !important;
+      width:max-content !important;
+      min-width:100% !important;
+      padding:0 8px !important;
+      box-sizing:border-box !important;
+    }
+
+    .nav button {
+      flex:0 0 76px !important;
+      width:76px !important;
+      min-width:76px !important;
+      padding:6px 4px !important;
+      font-size:11px !important;
+      white-space:nowrap !important;
+    }
+
+    /* 生理・予定と「今日の記録」の間隔を広げる */
+    .quick-grid {
+      margin-bottom:24px !important;
+    }
+
+    .quick-grid + .card {
+      margin-top:0 !important;
+    }
 
     @media(max-width:380px) {
 
@@ -704,18 +701,8 @@ function injectExtraCSS() {
         gap:6px !important;
       }
 
-      .nav {
-        gap:2px !important;
-        padding-left:4px !important;
-        padding-right:4px !important;
-      }
-
       .nav button {
         font-size:10px !important;
-      }
-
-      .nav button span {
-        font-size:19px !important;
       }
 
     }
@@ -739,6 +726,8 @@ async function boot() {
     return;
   }
 
+  try { await registerPushServiceWorker(); } catch (e) { console.warn("Service Worker registration failed", e); }
+
   const {
     data: { session }
   } = await sb.auth.getSession();
@@ -759,6 +748,7 @@ async function boot() {
 
   await loadFamily();
 
+  startNotificationChecker();
   render();
 }
 
@@ -815,6 +805,11 @@ async function loadFamily() {
 
   family = f || null;
 
+  /*
+    現在の pregnancies テーブルで確実に存在する
+    family_id / due_date のみ利用する
+  */
+
   const {
     data: p,
     error: pregnancyError
@@ -844,7 +839,7 @@ function config() {
     <div class="auth">
       <div class="auth-card">
 
-        <h1>💩&💊</h1>
+        <h1>💩＆💊</h1>
 
         <div class="notice">
           Supabase設定が必要です
@@ -871,7 +866,7 @@ function auth() {
 
       <div class="auth-card">
 
-        <h1>💩&💊</h1>
+        <h1>💩＆💊</h1>
 
         <p style="text-align:center;font-weight:900">
           タカちゃん × オタヤダ
@@ -1007,8 +1002,10 @@ function onboarding() {
           >
 
           <select id="role" class="input">
+
             <option value="wife">👩 妻</option>
             <option value="husband">👨 夫</option>
+
           </select>
 
           <input
@@ -1177,6 +1174,11 @@ async function joinFamily() {
     return;
   }
 
+  /*
+    familiesを直接SELECTしない。
+    RPCで招待コードを検索して参加する。
+  */
+
   const {
     data,
     error
@@ -1303,7 +1305,7 @@ async function copyInvite(code) {
 async function shareInvite(code) {
 
   const text =
-    `💩&💊 体調・服薬記録アプリ\n\n` +
+    `💩＆💊 体調・服薬記録アプリ\n\n` +
     `家族招待コード：${code}`;
 
   if (navigator.share) {
@@ -1311,7 +1313,7 @@ async function shareInvite(code) {
     try {
 
       await navigator.share({
-        title: "💩&💊 家族招待",
+        title: "💩＆💊 家族招待",
         text
       });
 
@@ -1680,6 +1682,11 @@ async function deleteMedication(id) {
     "この薬・サプリを登録一覧から削除しますか？"
   )) return;
 
+  /*
+    履歴を壊さないため、
+    medication_logsがある薬はis_active=falseにする。
+  */
+
   const { error } =
     await sb
       .from("medications")
@@ -1723,11 +1730,13 @@ function addVomit() {
           id="vomitSeverity"
           class="input"
         >
+
           <option value="1">😌 軽い</option>
           <option value="2">😐 少しつらい</option>
           <option value="3" selected>😵 普通</option>
           <option value="4">😫 かなりつらい</option>
           <option value="5">🤮 とてもつらい</option>
+
         </select>
 
         <textarea
@@ -1935,18 +1944,22 @@ function addPeriod() {
           id="periodType"
           class="input"
         >
+
           <option value="start">🌸 生理開始</option>
           <option value="end">🌸 生理終了</option>
           <option value="pain">😖 生理痛</option>
+
         </select>
 
         <select
           id="periodLevel"
           class="input"
         >
+
           <option value="1">少ない</option>
           <option value="2" selected>普通</option>
           <option value="3">多い</option>
+
         </select>
 
         <textarea
@@ -2353,6 +2366,11 @@ async function deleteHealthRecord(id) {
     "この記録を削除しますか？"
   )) return;
 
+  /*
+    子テーブル → health_records
+    の順番で削除
+  */
+
   await sb
     .from("poop_records")
     .delete()
@@ -2402,18 +2420,6 @@ async function deleteHealthRecord(id) {
 ========================================================= */
 
 async function dayRecords(targetDate) {
-
-  const start =
-    new Date(
-      `${targetDate}T00:00:00`
-    );
-
-  const end =
-    new Date(start);
-
-  end.setDate(
-    end.getDate() + 1
-  );
 
   const {
     data,
@@ -2465,11 +2471,11 @@ async function dayRecords(targetDate) {
     )
     .gte(
       "recorded_at",
-      start.toISOString()
+      targetDate + "T00:00:00"
     )
     .lt(
       "recorded_at",
-      end.toISOString()
+      targetDate + "T23:59:59.999"
     )
     .order(
       "recorded_at",
@@ -2687,7 +2693,9 @@ async function eventsForDate(
     );
 
   const end =
-    new Date(start);
+    new Date(
+      start
+    );
 
   end.setDate(
     end.getDate() + 1
@@ -2749,6 +2757,13 @@ async function calendar() {
   start.setDate(
     1 - first.getDay()
   );
+
+  const last =
+    new Date(
+      year,
+      month + 1,
+      0
+    );
 
   const [
     healthData,
@@ -3022,28 +3037,6 @@ async function calendar() {
 
       </div>
 
-
-      <!-- =================================================
-           ★ 選択した日の詳細
-      ================================================== -->
-
-      <div class="selected-day-header">
-
-        <div class="big-date">
-          📅 ${fmt(selectedDate)}
-        </div>
-
-        <div class="day-label">
-          カレンダーの日付を選択中
-        </div>
-
-      </div>
-
-
-      <!-- =================================================
-           予定
-      ================================================== -->
-
       <div class="card">
 
         <div class="section-title">
@@ -3072,11 +3065,6 @@ async function calendar() {
 
       </div>
 
-
-      <!-- =================================================
-           ★ その日の記録
-      ================================================== -->
-
       <div class="card">
 
         <div class="section-title">
@@ -3085,14 +3073,10 @@ async function calendar() {
 
         ${
           selectedRecords.length
-            ? `
-              <div class="list">
-                ${selectedRecords.map(entry).join("")}
-              </div>
-            `
+            ? selectedRecords.map(entry).join("")
             : `
               <div class="empty">
-                この日の記録はないよ〜！
+                記録はありません
               </div>
             `
         }
@@ -3107,9 +3091,7 @@ async function calendar() {
 
 
 /* =========================================================
-   ★ Calendar day
-   日付を押したら「予定追加」ではなく
-   その日の詳細を表示する
+   Calendar day
 ========================================================= */
 
 function calendarDay(key) {
@@ -3119,12 +3101,7 @@ function calendarDay(key) {
       `${key}T00:00:00`
     );
 
-  /*
-    カレンダーを再描画することで、
-    選択日の「予定」と「記録」の両方を表示
-  */
-
-  render();
+  eventModal(key);
 }
 
 
@@ -3322,7 +3299,9 @@ function eventItem(event) {
     <div class="event-item">
 
       <div class="event-date">
-        ${fmt(event.start_at)}
+        ${
+          fmt(event.start_at)
+        }
        　
         ${
           event.is_all_day
@@ -3715,6 +3694,11 @@ async function saveCheckup() {
     return;
   }
 
+  /*
+    検診記録自体もカレンダーに表示するため
+    calendar_eventsにも登録
+  */
+
   const {
     data:event,
     error:eventError
@@ -3836,6 +3820,10 @@ async function updateCheckup(id) {
     flash(error.message);
     return;
   }
+
+  /*
+    linked eventも更新
+  */
 
   if (old?.event_id) {
 
@@ -4245,7 +4233,7 @@ async function home() {
   return `
     <header class="hero">
 
-      <h1>💩&💊</h1>
+      <h1>💩＆くすり記録</h1>
 
       <p>
         タカちゃん × オタヤダ
@@ -4282,13 +4270,20 @@ async function home() {
           ›
         </button>
 
-        <!-- ★ カレンダー絵文字専用ボタン -->
         <button
-          class="btn soft calendar-icon-btn"
+          class="btn soft"
           onclick="go('calendar')"
           aria-label="カレンダー"
         >
-          <span>📅</span>
+          📅
+        </button>
+
+        <button
+          class="btn soft"
+          onclick="notificationModal()"
+          aria-label="通知設定"
+        >
+          🔔
         </button>
 
       </div>
@@ -4468,9 +4463,7 @@ async function home() {
       </div>
 
 
-      <!-- ★ 生理・予定ボタンとの間隔を確保 -->
-
-      <div class="card" style="margin-top:22px !important">
+      <div class="card">
 
         <div class="section-title">
           📒 ${fmt(dk(date))}の記録
@@ -5233,45 +5226,26 @@ async function allRecords() {
 
 /* =========================================================
    Navigation
+   ★ 履歴は夫婦へ移動
 ========================================================= */
 
 function nav(active) {
-
   return `
     <nav class="nav">
-
-      <button
-        class="${active === "home" ? "active" : ""}"
-        onclick="go('home')"
-      >
-        <span>🏠</span>
-        ホーム
-      </button>
-
-      <button
-        class="${active === "calendar" ? "active" : ""}"
-        onclick="go('calendar')"
-      >
-        <span>📅</span>
-        カレンダー
-      </button>
-
-      <button
-        class="${active === "pregnancy" ? "active" : ""}"
-        onclick="go('pregnancy')"
-      >
-        <span>🤰</span>
-        妊娠
-      </button>
-
-      <button
-        class="${active === "settings" ? "active" : ""}"
-        onclick="go('settings')"
-      >
-        <span>❤️</span>
-        夫婦
-      </button>
-
+      <div class="nav-scroll">
+        <button class="${active === "home" ? "active" : ""}" onclick="go('home')">
+          <span>🏠</span>ホーム
+        </button>
+        <button class="${active === "calendar" ? "active" : ""}" onclick="go('calendar')">
+          <span>📅</span>カレンダー
+        </button>
+        <button class="${active === "pregnancy" ? "active" : ""}" onclick="go('pregnancy')">
+          <span>🤰</span>妊娠
+        </button>
+        <button class="${active === "settings" ? "active" : ""}" onclick="go('settings')">
+          <span>❤️</span>夫婦
+        </button>
+      </div>
     </nav>
   `;
 }
