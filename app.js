@@ -238,22 +238,30 @@ async function testPushNotification() {
       return;
     }
 
+    flash("🧪 送信中…");
+
     const sub = await getPushSubscription();
     if (!sub || Notification.permission !== "granted") {
-      flash("先に「通知をONにする」を設定してください");
+      flash("先に「通知をONにする」を設定してください（購読が見つかりません）");
       return;
     }
 
     // Edge Function経由で送るため、アプリを閉じた状態のPushも確認できます。
-    const { data, error } = await sb.functions.invoke("send-notifications", {
+    // 通信が固まって無反応に見えるのを防ぐため、10秒でタイムアウトさせます。
+    const invokePromise = sb.functions.invoke("send-notifications", {
       body: { test: true, user_id: user.id }
     });
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("サーバーからの応答がありません（タイムアウト）")), 10000)
+    );
+
+    const { data, error } = await Promise.race([invokePromise, timeoutPromise]);
 
     if (error) throw error;
     flash(data?.sent ? "🔔 サーバーからテスト通知を送信しました！" : "📭 通知先がありません");
   } catch (e) {
     console.error(e);
-    flash("テスト通知に失敗しました：" + (e.message || e));
+    flash("テスト通知に失敗しました：" + (e?.message || String(e)));
   }
 }
 
@@ -2615,11 +2623,11 @@ async function dayRecords(targetDate) {
     )
     .gte(
       "recorded_at",
-      targetDate + "T00:00:00"
+      new Date(`${targetDate}T00:00:00`).toISOString()
     )
     .lt(
       "recorded_at",
-      targetDate + "T23:59:59.999"
+      new Date(`${targetDate}T23:59:59.999`).toISOString()
     )
     .order(
       "recorded_at",
