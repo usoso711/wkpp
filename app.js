@@ -345,15 +345,18 @@ function localDateTimeValue(s) {
 
 function flash(text) {
 
+  const stackIndex = document.querySelectorAll(".app-flash").length;
+
   const x = document.createElement("div");
 
+  x.className = "app-flash";
   x.textContent = text;
 
   x.style = `
     position:fixed;
     z-index:99999;
     left:50%;
-    top:18px;
+    top:${18 + stackIndex * 56}px;
     transform:translateX(-50%);
     background:#392d42;
     color:#fff;
