@@ -185,10 +185,15 @@ async function saveNotificationPreference(enabledOverride = null) {
   const enabled = enabledOverride === null
     ? (checkbox ? checkbox.checked : localStorage.getItem("notifyEnabled") === "true")
     : enabledOverride;
+  const notifyOnRecordCheckbox = document.getElementById("notifyOnRecord");
+  const notifyOnRecord = notifyOnRecordCheckbox
+    ? notifyOnRecordCheckbox.checked
+    : localStorage.getItem("notifyOnRecord") !== "false";
 
   localStorage.setItem("notifyTime", time);
   localStorage.setItem("notifyMessage", message);
   localStorage.setItem("notifyEnabled", String(enabled));
+  localStorage.setItem("notifyOnRecord", String(notifyOnRecord));
 
   try {
     const { error } = await sb
@@ -197,6 +202,7 @@ async function saveNotificationPreference(enabledOverride = null) {
         user_id: user.id,
         family_id: profile?.family_id || null,
         enabled,
+        notify_on_record: notifyOnRecord,
         daily_time: time,
         message,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Tokyo",
@@ -395,6 +401,50 @@ function poopExplosion() {
       left:50%;
       top:48%;
       font-size:${28 + Math.random() * 32}px;
+      pointer-events:none;
+      transform:translate(-50%,-50%);
+      animation:poopFly .9s cubic-bezier(.2,.8,.2,1) forwards;
+      --x:${Math.cos(angle) * distance}px;
+      --y:${Math.sin(angle) * distance}px;
+      --r:${Math.random() * 720 - 360}deg;
+    `;
+
+    document.body.appendChild(x);
+
+    setTimeout(() => x.remove(), 1000);
+  });
+}
+
+
+/* =========================================================
+   💊 お薬ブワッ演出
+========================================================= */
+
+function pillExplosion() {
+
+  const emojis = [
+    "💊", "💊", "💊", "💊",
+    "💊", "💊", "💊", "💊"
+  ];
+
+  emojis.forEach((emoji, i) => {
+
+    const x = document.createElement("div");
+
+    x.textContent = emoji;
+
+    const angle =
+      (Math.PI * 2 / emojis.length) * i;
+
+    const distance =
+      100 + Math.random() * 150;
+
+    x.style = `
+      position:fixed;
+      z-index:99998;
+      left:50%;
+      top:48%;
+      font-size:${26 + Math.random() * 26}px;
       pointer-events:none;
       transform:translate(-50%,-50%);
       animation:poopFly .9s cubic-bezier(.2,.8,.2,1) forwards;
@@ -683,6 +733,17 @@ function injectExtraCSS() {
     .day .dot {
       font-size:12px;
       display:inline-block;
+    }
+
+    .day.today {
+      background:#fff4e0;
+    }
+
+    .day.selected {
+      outline:2px solid #9b7bd8;
+      outline-offset:-2px;
+      border-radius:10px;
+      background:#f1ecff;
     }
 
     .tabs {
@@ -1507,6 +1568,16 @@ async function hr(
 }
 
 
+function quickCommentEnabled() {
+  return localStorage.getItem("quickCommentEnabled") !== "false"; // デフォルトON
+}
+
+function askQuickComment(label) {
+  if (!quickCommentEnabled()) return "";
+  return prompt(label) ?? "";
+}
+
+
 /* =========================================================
    💩 Poop
 ========================================================= */
@@ -1533,7 +1604,7 @@ async function poopAdd(type, button) {
   }
 
   const comment =
-    prompt("💬 ウンチへのコメント（任意）") ?? "";
+    askQuickComment("💬 ウンチへのコメント（任意）");
 
   try {
 
@@ -1601,13 +1672,36 @@ async function meds() {
 async function medAdd(
   id,
   name,
-  icon
+  icon,
+  button
 ) {
+
+  pillExplosion();
+
+  if (button) {
+
+    button.animate(
+      [
+        { transform: "scale(1)" },
+        { transform: "scale(1.18) rotate(-4deg)" },
+        { transform: "scale(.95) rotate(4deg)" },
+        { transform: "scale(1)" }
+      ],
+      {
+        duration:450,
+        easing:"ease-out"
+      }
+    );
+
+  }
+
+  const comment =
+    askQuickComment("💬 お薬へのコメント（任意）");
 
   try {
 
     const record =
-      await hr("medicine");
+      await hr("medicine", comment);
 
     const { error } =
       await sb
@@ -1621,7 +1715,7 @@ async function medAdd(
 
     await notifyFamilyRecord("medicine", `${name}を記録しました`);
     flash(
-      `${icon} ${name}を飲んだ！`
+      `${icon} ブワッ！${name}を飲んだ！`
     );
 
     render();
@@ -4537,7 +4631,8 @@ async function home() {
                       medAdd(
                         '${medicine.id}',
                         '${esc(medicine.name)}',
-                        '${esc(medicine.icon || "💊")}'
+                        '${esc(medicine.icon || "💊")}',
+                        this
                       )
                     "
                   >
@@ -5197,6 +5292,11 @@ async function settings() {
           <input id="notifyTime" class="input" type="time" value="${esc(localStorage.getItem("notifyTime") || "20:00")}">
           <textarea id="notifyMessage" class="input textarea" placeholder="通知メッセージ">${esc(localStorage.getItem("notifyMessage") || "今日の体調・服薬記録はしましたか？")}</textarea>
 
+          <label style="display:flex;align-items:center;gap:8px;font-weight:700">
+            <input type="checkbox" id="notifyOnRecord" ${localStorage.getItem("notifyOnRecord") !== "false" ? "checked" : ""} onchange="saveNotificationSettingsFromUI()">
+            👩‍❤️‍👨 相方が記録したら通知する
+          </label>
+
           <button class="btn primary" onclick="saveNotificationSettingsFromUI()">💾 時刻・メッセージを保存</button>
           <button class="btn soft" onclick="enablePushNotifications()">🔔 通知をONにする</button>
           <button class="btn soft" onclick="testPushNotification()">🧪 テスト通知</button>
@@ -5204,6 +5304,15 @@ async function settings() {
         </div>
 
         <p class="hint" style="margin-top:10px">iPhoneはSafari → 共有 → ホーム画面に追加 → ホーム画面のアプリから通知ONにしてください。</p>
+      </div>
+
+
+      <div class="card">
+        <div class="section-title">💬 コメント入力</div>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:700">
+          <input type="checkbox" id="quickCommentEnabled" ${quickCommentEnabled() ? "checked" : ""} onchange="localStorage.setItem('quickCommentEnabled', this.checked); flash(this.checked ? '💬 コメント入力をONにしました' : '💬 コメント入力をOFFにしました')">
+          記録時にコメント入力を毎回表示する（ウンチ・お薬）
+        </label>
       </div>
 
 
