@@ -217,7 +217,7 @@ async function saveNotificationPreference(enabledOverride = null) {
 async function notifyFamilyRecord(type, detail = "") {
   try {
     if (!user || !profile?.family_id) return;
-    await sb.functions.invoke("send-notifications", {
+    const { data, error } = await sb.functions.invoke("send-notifications", {
       body: {
         event: "record",
         user_id: user.id,
@@ -226,9 +226,19 @@ async function notifyFamilyRecord(type, detail = "") {
         detail
       }
     });
+    if (error) {
+      console.warn("相方への記録通知に失敗", error);
+      flash("⚠️ 相方への通知に失敗：" + (error.message || error));
+      return;
+    }
+    console.log("record notify result", data);
+    if (!data?.sent) {
+      flash("📭 通知は送信されましたが、届く相手がいませんでした（相方の通知設定を確認してください）");
+    }
   } catch (e) {
     // 記録保存そのものは成功しているので、通知失敗では記録を巻き戻さない。
     console.warn("相方への記録通知に失敗", e);
+    flash("⚠️ 相方への通知に失敗：" + (e.message || e));
   }
 }
 
