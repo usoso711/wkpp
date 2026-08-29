@@ -495,7 +495,7 @@ function modal(title, html) {
         onclick="this.closest('.overlay').remove()"
       >×</button>
 
-      <h2>${title}</h2>
+      <h2 style="padding-right:44px">${title}</h2>
 
       ${html}
 
@@ -574,13 +574,14 @@ function injectExtraCSS() {
 
     .hero h1 {
       margin:0;
-      font-size:34px;
+      font-size:38px;
       line-height:1.1;
-      text-shadow:0 3px 0 #6b3fae, 0 6px 16px #37194b40;
-      background:linear-gradient(180deg,#fff,#ffe9fb);
-      -webkit-background-clip:text;
-      background-clip:text;
-      color:transparent;
+      color:#fff;
+      -webkit-text-stroke:2px #5a2f96;
+      text-shadow:
+        0 4px 0 #5a2f96,
+        0 8px 18px #2a123f66;
+      letter-spacing:.01em;
     }
 
     .date {
@@ -718,6 +719,29 @@ function injectExtraCSS() {
       font-size:16px;
     }
 
+    .modal {
+      position:relative;
+    }
+
+    .close {
+      position:absolute;
+      top:14px;
+      right:14px;
+      z-index:20;
+      width:36px;
+      height:36px;
+      border:none;
+      border-radius:50%;
+      background:#f1ecff;
+      color:#5f3d99;
+      font-size:20px;
+      font-weight:900;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
     .panel {
       width:100%;
       max-width:720px;
@@ -736,6 +760,22 @@ function injectExtraCSS() {
       padding:16px;
       margin-bottom:16px;
       box-shadow:0 6px 24px #37194b1a;
+      animation:cardIn .35s cubic-bezier(.2,.8,.2,1) backwards;
+    }
+
+    @keyframes cardIn {
+      0% {
+        opacity:0;
+        transform:translateY(10px) scale(.98);
+      }
+      100% {
+        opacity:1;
+        transform:translateY(0) scale(1);
+      }
+    }
+
+    .stat, .poop, .med {
+      animation:cardIn .3s cubic-bezier(.2,.8,.2,1) backwards;
     }
 
     .stats {
@@ -787,6 +827,9 @@ function injectExtraCSS() {
 
     .input, textarea.input, select.input {
       width:100%;
+      min-width:0;
+      max-width:100%;
+      box-sizing:border-box;
       border:2px solid #eee0ff;
       background:#faf7ff;
       border-radius:14px;
@@ -795,6 +838,13 @@ function injectExtraCSS() {
       color:#3d2c52;
       font-weight:700;
       margin-bottom:10px;
+    }
+
+    input[type="date"].input,
+    input[type="time"].input,
+    input[type="datetime-local"].input {
+      -webkit-appearance:none;
+      appearance:none;
     }
 
     .input:focus, textarea.input:focus, select.input:focus {
@@ -995,6 +1045,21 @@ function injectExtraCSS() {
       min-height:67px !important;
       padding:5px 2px !important;
       overflow:hidden;
+      border:none;
+      background:#faf7ff;
+      border-radius:12px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      gap:3px;
+      color:#3d2c52;
+      font-weight:700;
+    }
+
+    .day b {
+      font-size:14px;
+      font-weight:900;
     }
 
     .day .dot {
@@ -1002,15 +1067,24 @@ function injectExtraCSS() {
       display:inline-block;
     }
 
+    .day.other {
+      opacity:.35;
+      background:transparent;
+    }
+
     .day.today {
-      background:#fff4e0;
+      background:linear-gradient(160deg,#ffe4c2,#ffd39c);
+    }
+
+    .day.today b {
+      color:#7a4a10;
     }
 
     .day.selected {
       outline:2px solid #9b7bd8;
       outline-offset:-2px;
-      border-radius:10px;
-      background:#f1ecff;
+      border-radius:12px;
+      background:linear-gradient(160deg,#e9defc,#d9c8f7);
     }
 
     .entry {
@@ -1034,6 +1108,26 @@ function injectExtraCSS() {
       padding:9px 13px;
       box-shadow:0 2px 10px #37194b14;
       min-width:0;
+    }
+
+    .meta-title {
+      font-weight:900;
+      font-size:15px;
+      color:#3d2c52;
+    }
+
+    .meta-time {
+      font-size:11px;
+      color:#a099a8;
+      font-weight:700;
+      margin-top:2px;
+    }
+
+    .meta-comment {
+      font-size:13px;
+      color:#5c4b70;
+      margin-top:4px;
+      line-height:1.4;
     }
 
     .entry-partner {
@@ -3246,17 +3340,19 @@ function entry(record) {
 
       <div class="meta">
 
-        <b>${esc(name)}</b>
+        <div class="meta-title">
+          ${esc(name)}
+        </div>
 
-        <small>
+        <div class="meta-time">
           ${tm(record.recorded_at)}
+        </div>
 
-          ${
-            record.comment
-              ? `　💬 ${esc(record.comment)}`
-              : ""
-          }
-        </small>
+        ${
+          record.comment
+            ? `<div class="meta-comment">💬 ${esc(record.comment)}</div>`
+            : ""
+        }
 
         ${
           reactions.length
