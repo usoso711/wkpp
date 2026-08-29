@@ -759,52 +759,6 @@ function injectExtraCSS() {
       background:#f1ecff;
     }
 
-    .entry {
-      display:flex;
-      align-items:flex-start;
-      gap:8px;
-      margin:10px 0;
-      max-width:84%;
-    }
-
-    .entry .ico {
-      font-size:22px;
-      line-height:1;
-      flex-shrink:0;
-      margin-top:2px;
-    }
-
-    .entry .meta {
-      background:#fff;
-      border-radius:4px 16px 16px 16px;
-      padding:9px 13px;
-      box-shadow:0 2px 10px #37194b14;
-      min-width:0;
-    }
-
-    .entry-partner {
-      margin-right:auto;
-    }
-
-    .entry-mine {
-      margin-left:auto;
-      flex-direction:row-reverse;
-      text-align:right;
-    }
-
-    .entry-mine .meta {
-      background:#efe6ff;
-      border-radius:16px 4px 16px 16px;
-    }
-
-    .entry .record-actions {
-      justify-content:flex-start;
-    }
-
-    .entry-mine .record-actions {
-      justify-content:flex-end;
-    }
-
     .tabs {
       display:flex;
       overflow-x:auto;
@@ -2736,7 +2690,6 @@ async function dayRecords(targetDate) {
       record_type,
       recorded_at,
       comment,
-      profile_id,
 
       poop_records(
         poop_type,
@@ -2889,10 +2842,8 @@ function entry(record) {
     icon = "🌸";
   }
 
-  const isMine = record.profile_id === user?.id;
-
   return `
-    <div class="entry ${isMine ? "entry-mine" : "entry-partner"}">
+    <div class="entry">
 
       <div class="ico">
         ${icon}
