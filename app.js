@@ -576,6 +576,32 @@ function injectExtraCSS() {
       margin:0;
       font-size:34px;
       line-height:1.1;
+      text-shadow:0 3px 0 #6b3fae, 0 6px 16px #37194b40;
+      background:linear-gradient(180deg,#fff,#ffe9fb);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
+
+    .date {
+      flex:1;
+      min-width:0;
+      text-align:center;
+      font-weight:900;
+      font-size:16px;
+      color:#3d2c52;
+    }
+
+    .datebar button {
+      background:#f1ecff;
+      color:#5f3d99;
+      border-radius:14px;
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .stats {
+      margin-bottom:16px !important;
     }
 
     .hero p {
@@ -850,7 +876,7 @@ function injectExtraCSS() {
     }
 
     .btn.soft {
-      background:#f1ecff;
+      background:linear-gradient(135deg,#f6f0ff,#e9defc);
       color:#5f3d99;
     }
 
