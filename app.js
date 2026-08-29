@@ -722,6 +722,133 @@ function injectExtraCSS() {
       margin-top:22px !important;
     }
 
+    button {
+      font-family:inherit;
+    }
+
+    .btn {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      width:100%;
+      border:none;
+      border-radius:16px;
+      padding:15px 12px;
+      font-weight:900;
+      font-size:15px;
+      cursor:pointer;
+      background:#f1ecff;
+      color:#5f3d99;
+      box-shadow:0 3px 10px #37194b14;
+      transition:transform .12s ease;
+    }
+
+    .btn:active {
+      transform:scale(.97);
+    }
+
+    .btn.primary {
+      background:linear-gradient(135deg,#9b7bd8,#7c5cc4);
+      color:#fff;
+    }
+
+    .btn.soft {
+      background:#f1ecff;
+      color:#5f3d99;
+    }
+
+    .btn.pink {
+      background:linear-gradient(135deg,#ff9fc0,#ff6f9c);
+      color:#fff;
+    }
+
+    .btn.danger {
+      background:#ffe3e6;
+      color:#d23a55;
+    }
+
+    .section-title {
+      font-weight:900;
+      font-size:15px;
+      color:#4a3468;
+      margin-bottom:12px;
+    }
+
+    .poop-grid, .med-grid {
+      position:relative;
+    }
+
+    .poop, .med, .addmed {
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      border:none;
+      border-radius:18px;
+      padding:16px 8px;
+      font-weight:900;
+      font-size:14px;
+      cursor:pointer;
+      overflow:hidden;
+      box-shadow:0 4px 14px #37194b1f;
+      transition:transform .12s ease;
+      color:#fff;
+    }
+
+    .poop:active, .med:active, .addmed:active {
+      transform:scale(.96);
+    }
+
+    .poop .emoji, .med .emoji {
+      font-size:30px;
+      line-height:1;
+    }
+
+    .poop.koro {
+      background:linear-gradient(150deg,#a9795a,#7a5138);
+    }
+
+    .poop.banana {
+      background:linear-gradient(150deg,#ffd76a,#f4a723);
+      color:#5c3d10;
+    }
+
+    .poop.becha {
+      background:linear-gradient(150deg,#ffc861,#ff8a3d);
+      color:#5c2f10;
+    }
+
+    .poop.liquid {
+      background:linear-gradient(150deg,#7fd4f5,#3aa3e0);
+    }
+
+    .med {
+      background:#fff;
+      color:#3a5fc4;
+      border:2px solid #6f8cff;
+      box-shadow:0 3px 10px #37194b12;
+    }
+
+    .addmed {
+      background:#f6f2ff;
+      color:#7c5cc4;
+      border:2px dashed #b79fe8;
+      box-shadow:none;
+    }
+
+    .splash {
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+    }
+
+    .splash i {
+      display:none;
+    }
+
     .poop-grid {
       display:grid !important;
       grid-template-columns:repeat(2,minmax(0,1fr)) !important;
