@@ -568,6 +568,26 @@ function injectExtraCSS() {
     .hero {
       position:relative;
       overflow:hidden;
+      padding:22px 20px 26px;
+      text-align:center;
+    }
+
+    .hero h1 {
+      margin:0;
+      font-size:34px;
+      line-height:1.1;
+    }
+
+    .hero p {
+      margin:6px 0 0;
+      font-size:15px;
+      font-weight:800;
+      color:#fff;
+      opacity:.92;
+    }
+
+    .hero .notice {
+      margin-top:14px !important;
     }
 
     .hero .toilet {
