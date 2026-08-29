@@ -685,6 +685,11 @@ function injectExtraCSS() {
       width:100%;
       max-width:100%;
       overflow:hidden;
+      background:#fff;
+      border-radius:22px;
+      padding:16px;
+      margin-bottom:16px;
+      box-shadow:0 6px 24px #37194b1a;
     }
 
     .stats {
@@ -803,6 +808,59 @@ function injectExtraCSS() {
 
     .entry-mine .record-actions {
       justify-content:flex-end;
+    }
+
+    .reaction-row {
+      display:flex;
+      flex-wrap:wrap;
+      gap:5px;
+      margin-top:6px;
+    }
+
+    .entry-mine .reaction-row {
+      justify-content:flex-end;
+    }
+
+    .reaction-chip {
+      border:none;
+      background:#f1ecff;
+      border-radius:12px;
+      padding:3px 9px;
+      font-size:12px;
+      font-weight:700;
+      color:#5f3d99;
+    }
+
+    .reaction-chip-mine {
+      background:#9b7bd8;
+      color:#fff;
+    }
+
+    .react-mini {
+      border:none;
+      background:#f1ecff;
+      border-radius:10px;
+      padding:4px 9px;
+      font-size:14px;
+    }
+
+    .reaction-picker {
+      position:fixed;
+      z-index:99998;
+      display:flex;
+      gap:4px;
+      background:#fff;
+      border-radius:16px;
+      padding:8px;
+      box-shadow:0 8px 30px #0004;
+    }
+
+    .reaction-picker button {
+      border:none;
+      background:none;
+      font-size:22px;
+      padding:4px;
+      cursor:pointer;
     }
 
     .tabs {
@@ -2769,6 +2827,12 @@ async function dayRecords(targetDate) {
         flow_level,
         pain_level,
         comment
+      ),
+
+      record_reactions(
+        id,
+        user_id,
+        emoji
       )
     `)
     .eq(
@@ -2891,6 +2955,26 @@ function entry(record) {
 
   const isMine = record.profile_id === user?.id;
 
+  const reactions = record.record_reactions || [];
+
+  const grouped = {};
+  reactions.forEach(r => {
+    (grouped[r.emoji] ||= []).push(r.user_id);
+  });
+
+  const myReaction =
+    reactions.find(r => r.user_id === user?.id)?.emoji;
+
+  const reactionChips =
+    Object.entries(grouped)
+      .map(([emoji, uids]) => `
+        <button
+          class="reaction-chip ${uids.includes(user?.id) ? "reaction-chip-mine" : ""}"
+          onclick="toggleReaction('${record.id}','${emoji}')"
+        >${emoji} ${uids.length}</button>
+      `)
+      .join("");
+
   return `
     <div class="entry ${isMine ? "entry-mine" : "entry-partner"}">
 
@@ -2912,7 +2996,20 @@ function entry(record) {
           }
         </small>
 
+        ${
+          reactions.length
+            ? `<div class="reaction-row">${reactionChips}</div>`
+            : ""
+        }
+
         <div class="record-actions">
+
+          <button
+            class="react-mini"
+            onclick="openReactionPicker('${record.id}', this)"
+          >
+            ${myReaction ? myReaction : "😊"}
+          </button>
 
           <button
             class="edit-mini"
@@ -2934,6 +3031,92 @@ function entry(record) {
 
     </div>
   `;
+}
+
+
+const REACTION_EMOJIS = ["👍","❤️","😂","😮","😢","🙏","🎉","💪"];
+
+function openReactionPicker(recordId, button) {
+
+  document
+    .querySelectorAll(".reaction-picker")
+    .forEach(el => el.remove());
+
+  const picker = document.createElement("div");
+
+  picker.className = "reaction-picker";
+
+  picker.innerHTML =
+    REACTION_EMOJIS
+      .map(e => `
+        <button onclick="toggleReaction('${recordId}','${e}');this.closest('.reaction-picker').remove()">${e}</button>
+      `)
+      .join("");
+
+  document.body.appendChild(picker);
+
+  const rect = button.getBoundingClientRect();
+
+  picker.style.position = "fixed";
+  picker.style.left =
+    `${Math.min(rect.left, window.innerWidth - 260)}px`;
+  picker.style.top =
+    `${rect.top - 54}px`;
+
+  setTimeout(() => {
+    document.addEventListener(
+      "click",
+      function closePicker(e) {
+        if (!picker.contains(e.target) && e.target !== button) {
+          picker.remove();
+          document.removeEventListener("click", closePicker);
+        }
+      }
+    );
+  }, 0);
+}
+
+async function toggleReaction(recordId, emoji) {
+
+  if (!user) return;
+
+  try {
+
+    const { data: existing } =
+      await sb
+        .from("record_reactions")
+        .select("id, emoji")
+        .eq("health_record_id", recordId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    if (existing && existing.emoji === emoji) {
+
+      await sb
+        .from("record_reactions")
+        .delete()
+        .eq("id", existing.id);
+
+    } else {
+
+      await sb
+        .from("record_reactions")
+        .upsert(
+          {
+            health_record_id: recordId,
+            user_id: user.id,
+            emoji
+          },
+          { onConflict: "health_record_id,user_id" }
+        );
+    }
+
+    render();
+
+  } catch (e) {
+
+    flash("リアクションに失敗：" + (e.message || e));
+  }
 }
 
 
@@ -5490,6 +5673,7 @@ async function allRecords() {
       record_type,
       recorded_at,
       comment,
+      profile_id,
 
       poop_records(
         poop_type
@@ -5513,6 +5697,12 @@ async function allRecords() {
 
       period_records(
         period_type
+      ),
+
+      record_reactions(
+        id,
+        user_id,
+        emoji
       )
     `)
     .eq(
