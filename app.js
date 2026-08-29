@@ -685,11 +685,6 @@ function injectExtraCSS() {
       width:100%;
       max-width:100%;
       overflow:hidden;
-      background:#fff;
-      border-radius:22px;
-      padding:16px;
-      margin-bottom:16px;
-      box-shadow:0 6px 24px #37194b1a;
     }
 
     .stats {
