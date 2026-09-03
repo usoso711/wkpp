@@ -38,6 +38,7 @@ const icons = {
   vomit: "🤢",
   weight: "⚖️",
   period: "🌸",
+  comment: "💬",
   note: "📝"
 };
 
@@ -372,6 +373,62 @@ function flash(text) {
   document.body.appendChild(x);
 
   setTimeout(() => x.remove(), 2400);
+}
+
+function flashUndo(text, onUndo) {
+
+  const stackIndex = document.querySelectorAll(".app-flash").length;
+
+  const x = document.createElement("div");
+
+  x.className = "app-flash";
+
+  x.style = `
+    position:fixed;
+    z-index:99999;
+    left:50%;
+    top:${18 + stackIndex * 56}px;
+    transform:translateX(-50%);
+    background:#392d42;
+    color:#fff;
+    padding:10px 10px 10px 18px;
+    border-radius:18px;
+    font-weight:900;
+    box-shadow:0 8px 30px #0004;
+    max-width:92%;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:14px;
+  `;
+
+  const label = document.createElement("span");
+  label.textContent = text;
+
+  const undoBtn = document.createElement("button");
+  undoBtn.textContent = "↩️ 元に戻す";
+  undoBtn.style = `
+    background:#fff;
+    color:#392d42;
+    border:none;
+    border-radius:12px;
+    padding:6px 12px;
+    font-weight:900;
+    font-size:13px;
+    flex-shrink:0;
+  `;
+
+  undoBtn.onclick = () => {
+    x.remove();
+    onUndo();
+  };
+
+  x.appendChild(label);
+  x.appendChild(undoBtn);
+
+  document.body.appendChild(x);
+
+  setTimeout(() => x.remove(), 6000);
 }
 
 
@@ -2052,6 +2109,63 @@ function askQuickComment(label) {
 
 
 /* =========================================================
+   💬 コメント（独立した記録タイプ）
+========================================================= */
+
+function addCommentForm() {
+
+  modal(
+    "💬 コメントを残す",
+    `
+      <textarea
+        id="freeCommentText"
+        class="input textarea"
+        placeholder="ひとこと残そう…"
+        rows="4"
+      ></textarea>
+
+      <div class="modal-sticky-actions">
+        <button class="btn primary" onclick="saveFreeComment()">
+          💬 コメントを保存
+        </button>
+      </div>
+    `
+  );
+}
+
+async function saveFreeComment() {
+
+  const text =
+    document
+      .getElementById("freeCommentText")
+      ?.value
+      ?.trim();
+
+  if (!text) {
+    flash("コメントを入力してください");
+    return;
+  }
+
+  try {
+
+    await hr("comment", text);
+
+    await notifyFamilyRecord("comment", `「${text}」とコメントしました`);
+
+    closeModal();
+
+    flash("💬 コメントを保存しました");
+
+    render();
+
+  } catch (e) {
+
+    flash("コメントの保存に失敗：" + (e.message || e));
+  }
+}
+
+
+/* =========================================================
    💩 Poop
 ========================================================= */
 
@@ -3085,40 +3199,10 @@ async function deleteHealthRecord(id) {
     "この記録を削除しますか？"
   )) return;
 
-  /*
-    子テーブル → health_records
-    の順番で削除
-  */
-
-  await sb
-    .from("poop_records")
-    .delete()
-    .eq("health_record_id", id);
-
-  await sb
-    .from("medication_logs")
-    .delete()
-    .eq("health_record_id", id);
-
-  await sb
-    .from("vomit_records")
-    .delete()
-    .eq("health_record_id", id);
-
-  await sb
-    .from("weight_records")
-    .delete()
-    .eq("health_record_id", id);
-
-  await sb
-    .from("period_records")
-    .delete()
-    .eq("health_record_id", id);
-
   const { error } =
     await sb
       .from("health_records")
-      .delete()
+      .update({ deleted_at: new Date().toISOString() })
       .eq("id", id);
 
   if (error) {
@@ -3128,7 +3212,25 @@ async function deleteHealthRecord(id) {
 
   closeModal();
 
-  flash("🗑️ 削除しました");
+  flashUndo("🗑️ 削除しました", () => restoreHealthRecord(id));
+
+  render();
+}
+
+async function restoreHealthRecord(id) {
+
+  const { error } =
+    await sb
+      .from("health_records")
+      .update({ deleted_at: null })
+      .eq("id", id);
+
+  if (error) {
+    flash("元に戻すのに失敗：" + error.message);
+    return;
+  }
+
+  flash("↩️ 元に戻しました");
 
   render();
 }
@@ -3203,6 +3305,7 @@ async function dayRecords(targetDate) {
       "recorded_at",
       new Date(`${targetDate}T23:59:59.999`).toISOString()
     )
+    .is("deleted_at", null)
     .order(
       "recorded_at",
       { ascending:false }
@@ -3309,6 +3412,14 @@ function entry(record) {
     icon = "🌸";
   }
 
+  const isComment =
+    record.record_type === "comment";
+
+  if (isComment) {
+    name = record.comment || "コメント";
+    icon = "💬";
+  }
+
   const isMine = record.profile_id === user?.id;
 
   const reactions = record.record_reactions || [];
@@ -3349,7 +3460,7 @@ function entry(record) {
         </div>
 
         ${
-          record.comment
+          record.comment && !isComment
             ? `<div class="meta-comment">💬 ${esc(record.comment)}</div>`
             : ""
         }
@@ -3639,7 +3750,8 @@ async function calendar() {
           month + 1,
           1
         ).toISOString()
-      ),
+      )
+      .is("deleted_at", null),
 
     eventsForMonth(
       year,
@@ -5301,6 +5413,14 @@ async function home() {
 
       </div>
 
+      <button
+        class="btn soft"
+        style="margin-top:8px"
+        onclick="addCommentForm()"
+      >
+        💬 コメントを残す
+      </button>
+
 
       <div class="card">
 
@@ -6019,61 +6139,69 @@ async function loadMedicationManagement() {
    📒 All Records
 ========================================================= */
 
-async function allRecords() {
+async function allRecords(keyword = "") {
+
+  let query =
+    sb
+      .from("health_records")
+      .select(`
+        id,
+        record_type,
+        recorded_at,
+        comment,
+        profile_id,
+
+        poop_records(
+          poop_type
+        ),
+
+        medication_logs(
+          medication_id,
+          medications(
+            name,
+            icon
+          )
+        ),
+
+        vomit_records(
+          severity
+        ),
+
+        weight_records(
+          weight_kg
+        ),
+
+        period_records(
+          period_type
+        ),
+
+        record_reactions(
+          id,
+          user_id,
+          emoji
+        )
+      `)
+      .eq(
+        "family_id",
+        profile.family_id
+      )
+      .is("deleted_at", null)
+      .order(
+        "recorded_at",
+        {
+          ascending:false
+        }
+      )
+      .limit(300);
+
+  if (keyword) {
+    query = query.ilike("comment", `%${keyword}%`);
+  }
 
   const {
     data,
     error
-  } = await sb
-    .from("health_records")
-    .select(`
-      id,
-      record_type,
-      recorded_at,
-      comment,
-      profile_id,
-
-      poop_records(
-        poop_type
-      ),
-
-      medication_logs(
-        medication_id,
-        medications(
-          name,
-          icon
-        )
-      ),
-
-      vomit_records(
-        severity
-      ),
-
-      weight_records(
-        weight_kg
-      ),
-
-      period_records(
-        period_type
-      ),
-
-      record_reactions(
-        id,
-        user_id,
-        emoji
-      )
-    `)
-    .eq(
-      "family_id",
-      profile.family_id
-    )
-    .order(
-      "recorded_at",
-      {
-        ascending:false
-      }
-    )
-    .limit(300);
+  } = await query;
 
   if (error) {
     flash(error.message);
@@ -6083,6 +6211,13 @@ async function allRecords() {
   modal(
     "📒 最近の記録",
     `
+      <input
+        class="input"
+        placeholder="🔍 コメントで検索…"
+        value="${esc(keyword)}"
+        onkeydown="if(event.key==='Enter'){allRecords(this.value)}"
+      >
+
       <div class="family-history-list">
 
         ${
